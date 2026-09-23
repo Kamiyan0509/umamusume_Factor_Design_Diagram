@@ -1,0 +1,30 @@
+{
+ "name": "ウマ娘 因子設計ボード",
+ "short_name": "因子設計",
+ "lang": "ja",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#F4F1E9",
+ "theme_color": "#2E7453",
+ "description": "コースと育成ウマ娘から、継承固有・相性・赤因子を考えた5世代の因子設計図を作るツール（オフライン対応）",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
