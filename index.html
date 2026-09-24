@@ -972,7 +972,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 02:04`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 03:10`;
 
 
 // ---- キャラアイコン ----
@@ -1338,7 +1338,7 @@ function renderSub(){
   const gpCard=g=>byCh[g]?.gpCard||lowerCards(g)[0];
   const gps=[...best.g1.map(x=>[best.p1,x]),...best.g2.map(x=>[best.p2,x])];
   const chAptMax=ch=>Array.from({length:10},(_,t)=>charBest(ch,t)); const t7=[child.ch,best.p1.ch,best.p2.ch,...best.g1.map(x=>x.g),...best.g2.map(x=>x.g)];
-  const TS=t7.map((ch,k)=>k===0?[]:g1Wins(ch,chAptMax(ch))); const tB=g1BonusOf(TS,0);
+  const TS=t7.map((ch,k)=>k===0?[]:g1Wins(ch,g1Lift(chAptMax(ch)))); const tB=g1BonusOf(TS,0);
   body.innerHTML=`
   <div class="compat"><div><b>相性合計 <span>${best.compat+tB}</span></b><div class="muted" style="font-size:12px">子×親 ${pair(child.ch,best.p1.ch)} + ${pair(child.ch,best.p2.ch)}・親×親 ${pair(best.p1.ch,best.p2.ch)}・子×親×祖父母 ${[...best.g1,...best.g2].map(x=>x.t).join(' + ')}・同一G1 <span>+${tB}</span></div></div></div>
   <div class="g1row"><span class="muted small">周回で勝つG1（同じG1 1レースにつき相性+${G1PT}）</span>${[['親1',1,0],['親2',2,1],['祖1',3,1],['祖2',4,1],['祖3',5,2],['祖4',6,2]].map(([l,i,pt])=>`<span class="g1cell">${l} ${g1Badge(TS,i,i<=2?3-i:pt,true)}</span>`).join('')}</div>
@@ -1422,14 +1422,28 @@ const g1SlotsOf=(ch,r)=>{ const O=objOf(ch); return g1Slots(r).filter(sl=>!O.at.
 // そのウマ娘が出走できないG1の理由（牝馬限定・育成目標と同じ時期）。出られるなら ''
 function g1Block(ch,r){ if(r[6]&&!isFemale(ch)) return '牝馬限定のレース'; if(g1SlotsOf(ch,r).length) return '';
   const O=objOf(ch); const w=g1Slots(r).map(sl=>[...(O.at.get(sl)||[])].map(g=>g&&G1BY[g]?G1BY[g][1]:'G1以外のレース').join('・')); return `育成目標（${[...new Set(w)].join('／')}）と同じ時期`; }
-// 因子周回で勝てるG1の見込み：芝・ダートのマイル／中距離／長距離で適性が足りるもの（短距離は目標レースのときだけ）＋育成目標のG1。目標と同じ時期のG1は除く
-function g1Wins(ch,apt){ if(!ch||!apt) return []; const key=ch+'|'+apt.join(''); if(G1MEMO.has(key)) return G1MEMO.get(key); const O=objOf(ch);
-  const ok=new Set(G1R.filter(r=>!g1Block(ch,r)&&(O.forced.has(r[0])||(apt[r[2]===1?0:1]>=(r[2]===1?5:3)&&g1Cat(r[3])!==2&&apt[g1Cat(r[3])]>=5))).map(r=>r[0]));
-  const pri=[...O.forced].filter(id=>ok.has(id)).concat((routeOf(ch)==='T'||(!routeOf(ch)&&isFemale(ch))?G1_PRI_T:G1_PRI_C).filter(id=>ok.has(id)&&!O.forced.has(id)));
-  const owner=new Map(); // ターン → レース（増加路で最大マッチング：育成目標のG1、優先順の高いレースから入れる）
+// 因子周回で出走するG1（理想ローテの候補）：芝・ダートのマイル／中距離／長距離で適性が足りるもの（短距離は目標レースのときだけ）＋育成目標のG1。目標と同じ時期・牝馬限定は除く
+const G1CAN=new Map();
+function g1Can(ch,apt){ const key=ch+'|'+apt.join(''); let v=G1CAN.get(key); if(v) return v; const O=objOf(ch);
+  v=new Set(G1R.filter(r=>!g1Block(ch,r)&&(O.forced.has(r[0])||(apt[r[2]===1?0:1]>=(r[2]===1?5:3)&&g1Cat(r[3])!==2&&apt[g1Cat(r[3])]>=5))).map(r=>r[0])); G1CAN.set(key,v); return v; }
+// 同じ時期に出られるのは1レース：重みの大きいG1から入れる（増加路つきの貪欲法。どの選び方でも勝利数は最大のまま、重みの合計が最大になる）
+function g1Pick(ch,apt,wt){ const O=objOf(ch), can=g1Can(ch,apt); const base=(routeOf(ch)==='T'||(!routeOf(ch)&&isFemale(ch))?G1_PRI_T:G1_PRI_C); const pr=id=>{ const k=base.indexOf(id); return k<0?99:k; };
+  const order=[...can].sort((a,b)=>(O.forced.has(b)-O.forced.has(a))||(((wt&&wt.get(b))||0)-((wt&&wt.get(a))||0))||(pr(a)-pr(b)));
+  const owner=new Map();
   const tryPut=(id,seen)=>{ for(const sl of g1SlotsOf(ch,G1BY[id])){ if(seen.has(sl)) continue; seen.add(sl); const o=owner.get(sl); if(o==null||(!O.forced.has(o)&&tryPut(o,seen))){ owner.set(sl,id); return true; } } return false; };
-  const won=[]; for(const id of pri) if(tryPut(id,new Set())) won.push(id);
-  const W=new Set(owner.values()); const out=G1R.map(r=>r[0]).filter(id=>W.has(id)); G1MEMO.set(key,out); return out; }
+  for(const id of order) tryPut(id,new Set());
+  return new Set(owner.values()); }
+function g1Wins(ch,apt){ if(!ch||!apt) return []; const key=ch+'|'+apt.join(''); if(G1MEMO.has(key)) return G1MEMO.get(key);
+  const out=g1Order(g1Pick(ch,apt,null)); G1MEMO.set(key,out); return out; }
+// 家系でそろえた理想ローテ：同一G1の相性ボーナスは「組の両方が勝ったG1」で決まるので、各枠は組になる相手も出られるG1を優先して選ぶ（勝利数は変えずに共通のG1を最大化）
+// items[i]={ch,apt,fix:勝利G1の実績(Set)|null,must:白因子などで勝ちが分かっているG1(Set)|null}、pairs=[[a,b,重み]]
+function g1Family(items,pairs){ const n=items.length, can=[], cur=[], nb=items.map(()=>[]);
+  for(let i=0;i<n;i++){ const x=items[i]; if(!x){ can[i]=cur[i]=null; continue; } can[i]=x.fix||g1Can(x.ch,x.apt); cur[i]=x.fix?new Set(x.fix):new Set(g1Wins(x.ch,x.apt)); if(x.must) x.must.forEach(r=>cur[i].add(r)); }
+  for(const [a,b,w] of pairs) if(items[a]&&items[b]){ nb[a].push([b,w]); nb[b].push([a,w]); }
+  for(let it=0;it<2;it++) for(let i=0;i<n;i++){ const x=items[i]; if(!x||x.fix||!nb[i].length) continue; const wt=new Map();
+    for(const r of can[i]){ let v=0; for(const [j,w] of nb[i]) v+=w*(cur[j].has(r)?1:can[j].has(r)?0.5:0); if(x.must&&x.must.has(r)) v+=1000; if(v) wt.set(r,v); }
+    const S=g1Pick(x.ch,x.apt,wt); if(x.must) x.must.forEach(r=>S.add(r)); cur[i]=S; }
+  return cur.map(S=>S?g1Order(S):[]); }
 // 同一G1の相性ボーナス：その枠の「親1×親2」「親×その親（祖）」の組ごとに、両方が勝ったG1 1レースにつき +3（2回出られるレースは1回だけ数える）
 const G1PO=[]; function g1PairsOf(i){ return G1PO[i]||(G1PO[i]=g1PairsOf0(i)); }
 function g1PairsOf0(i){ const P=parentsOf(i); const out=[]; if(P.length===2) out.push([P[0],P[1]]); for(const p of P) for(const g of parentsOf(p)) out.push([p,g]); return out; }
@@ -1437,8 +1451,12 @@ const G1SET=new WeakMap(); const g1Set=b=>{ let B=G1SET.get(b); if(!B){ B=new Se
 const g1Shared=(a,b)=>{ const B=g1Set(b); return a.filter(x=>B.has(x)); };
 const g1Cnt=(a,b)=>{ const B=g1Set(b); let n=0; for(const x of a) if(B.has(x)) n++; return n; };
 // 各枠の勝利G1：戦績画像・手入力の実績があればそれ、無ければ育成シナリオの見込み（＋読み込んだ白因子のG1）
-function nodeG1(n,x){ if(!n) return []; if(x&&Array.isArray(x.g1)&&(!x.c||x.c===n.card)) return g1Order(new Set(x.g1)); const est=g1Wins(n.ch,n.post||cards[n.card].a); const fw=x&&x.w&&(!x.c||x.c===n.card)?g1OfWhites(x.w):null; if(!fw||!fw.size) return est; const S=new Set(est); fw.forEach(id=>S.add(id)); return g1Order(S); }
-function bpG1(bp){ if(!bp) return []; if(!bp._g1){ const X=bp.nfx||{}; bp._g1=bp.nodes.map((n,i)=>nodeG1(n,X[i])); } return bp._g1; }
+function nodeG1(n,x){ if(!n) return []; if(x&&Array.isArray(x.g1)&&(!x.c||x.c===n.card)) return g1Order(new Set(x.g1)); const est=g1Wins(n.ch,g1Lift([...(n.post||cards[n.card].a)])); const fw=x&&x.w&&(!x.c||x.c===n.card)?g1OfWhites(x.w):null; if(!fw||!fw.size) return est; const S=new Set(est); fw.forEach(id=>S.add(id)); return g1Order(S); }
+let G1WP=null; const G1W_PAIRS_=()=>{ if(G1WP) return G1WP; G1WP=[]; for(let i=0;i<15;i++) for(const [a,b] of g1PairsOf0(i)) G1WP.push([a,b,i===0?10:i<=2?3:1]); return G1WP; };
+function bpG1(bp){ if(!bp) return []; if(!bp._g1){ const X=bp.nfx||{};
+    const items=bp.nodes.map((n,i)=>{ if(!n) return null; const x=X[i], ok=x&&(!x.c||x.c===n.card); const fw=ok&&x.w?g1OfWhites(x.w):null;
+      return {ch:n.ch,apt:g1Lift([...(n.post||cards[n.card].a)]),fix:ok&&Array.isArray(x.g1)?new Set(x.g1):null,must:fw&&fw.size?new Set([...fw].filter(id=>!g1Block(n.ch,G1BY[id]))):null}; });
+    bp._g1=g1Family(items,G1W_PAIRS_()); } return bp._g1; }
 const g1Act=(bp,i)=>{ const x=bp&&bp.nfx&&bp.nfx[i]; return !!(x&&Array.isArray(x.g1)&&(!x.c||!bp.nodes[i]||x.c===bp.nodes[i].card)); };
 function g1BonusOf(sets,i){ let s=0; for(const [a,b] of g1PairsOf(i)) if(sets[a]&&sets[b]) s+=g1Cnt(sets[a],sets[b]); return s*G1PT; }
 const g1B=(bp,i)=>bp?g1BonusOf(bpG1(bp),i):0;
@@ -1554,6 +1572,9 @@ const postApt=(base,stars)=>base>=7?base:Math.min(7,base+boostOf(stars));
 // 発動率の目安：相性◎で☆3 親10%・祖7%（☆2 6%・☆1 3%）。相性に比例して増減する推定値
 const RATE={1:0.03,2:0.06,3:0.10};
 // 遺伝子：その枠の親・祖親の同じ赤因子☆合計 12以上→確定 / 6〜11→40%
+const GENE_NAMES=['芝','ダート','短距離','マイル','中距離','長距離','逃げ','先行','差し','追込'].map(x=>x+'の遺伝子');
+// 読み込んだ白因子のうち「〇〇の遺伝子」→ {適性番号:1}（持っている遺伝子は確定で継承イベントの対象になる）
+const genesOfWhites=W=>{ const o={}; for(const w of (W||[])){ const n=String(Array.isArray(w)?w[0]:w.n||'').replace(/\s/g,''); const k=GENE_NAMES.indexOf(n); if(k>=0) o[k]=1; } return o; };
 function genesOf(red){ const g={}; for(const i of [1,2,3,4,5,6]){ const st=new Array(10).fill(0); for(const n of ANC_T[i]){ const r=red[n]; if(r) st[r.t]+=r.s; } const o={}; for(let t=0;t<10;t++){ const v=st[t]; if(v>=6) o[t]=v>=12?1:0.4; } g[i]=o; } return g; } // その枠の親・祖の同じ赤因子☆合計 12以上→確定 / 6〜11→40%
 const GENE_RATE=0.06; // 遺伝子（白因子）の発動率の目安（相性◎・親）
 // 継承イベントは育成中に2回（クラシック4月・シニア4月）。ウマプランの効果で、各イベントは2パターンの因子テーブルから良い方を選べる
@@ -1644,8 +1665,11 @@ const nfOf=(baseKey,k)=>((state.nf||{})[baseKey]||{})[k]||{};
 // 育成ウマ娘の相性（同一G1ボーナス込み）は400以上を目標に設計する
 const COMPAT_MIN=400;
 const G1A=new Map(); // 因子周回で勝てるG1の見込み（ダートE・中距離Cまでは赤因子で上げる前提）
-const g1Lift=a=>{ a[1]=Math.max(a[1],3); a[4]=a[4]>=3?Math.max(a[4],5):a[4]+2; return a; }; // 設計図で上がる見込み：ダートE・中距離C（E未満は2段階まで）
+const g1Lift=a=>{ for(const t of [0,1,3,4,5]) a[t]=Math.min(7,a[t]+2); a[1]=Math.max(a[1],3); return a; }; // 理想のG1ローテ：赤因子の継承で芝・ダート・マイル・中距離・長距離の適性を2段階まで上げて出走する前提
 function g1Approx(ch){ let v=G1A.get(ch); if(!v){ v=g1Wins(ch,g1Lift(Array.from({length:10},(_,t)=>charBest(ch,t)))); G1A.set(ch,v); } return v; }
+const G1FAM=new Map(), G1P0=[[1,2,1],[1,3,1],[1,4,1],[2,5,1],[2,6,1]];
+function g1FamBonus(cs){ const key=cs.join(','); let v=G1FAM.get(key); if(v!=null) return v; if(G1FAM.size>50000) G1FAM.clear();
+  const S=g1Family([null,...cs.map(c=>({ch:cards[c].ch,apt:g1Lift([...cards[c].a])}))],G1P0); v=g1BonusOf(S,0); G1FAM.set(key,v); return v; }
 const G1AC=new Map(); function g1ApproxC(card){ let v=G1AC.get(card); if(!v){ v=g1Wins(cards[card].ch,g1Lift([...cards[card].a])); G1AC.set(card,v); } return v; }
 function planBlueprints(id,cids,st){
   const baseKey=id+'|'+cids.join(',')+'|'+st; const OV=state.ovr[baseKey]||{};
@@ -1717,7 +1741,7 @@ function planBlueprints(id,cids,st){
     const hasFA=!faNeed||[1,2,3,4,5,6].some(n=>sel[n].fa);
     const red=Array(31).fill(null); Object.assign(red,assignTopReds(slots6,n=>sel[n].card,PREF));
     const compat=nodeCompat(chs,0);
-    const holdOK=[1,2,3,4,5,6].filter(n=>cards[sel[n].card].a[red[n].t]>=7).length;
+    const holdOK=[1,2,3,4,5,6].reduce((z,n)=>{ const a=cards[sel[n].card].a[red[n].t]; return z+(a>=7?1:a===6?0.9:a===5?0.3:0); },0); // 適性A＝確実。Bは下の世代に同じ赤因子を置けば育成開始時／育成中の継承でAに上がる
     const gsum=sel[1].inh+sel[2].inh+0.3*(sel[3].inh+sel[4].inh+sel[5].inh+sel[6].inh);
     const nRent=[1,2,3,4,5,6].filter(n=>sel[n].r).length;
     const rsc=RW(c,p1)+RW(c,p2)+0.5*[3,4,5,6].reduce((z,n)=>z+RW(c,chs[n]),0);
@@ -1746,11 +1770,13 @@ function planBlueprints(id,cids,st){
     const NF=nfOf(baseKey,k), FR={}; for(const n in NF) if(NF[n]&&NF[n].r) FR[n]={t:NF[n].r.t,s:NF[n].r.s};
     const FR6={}; for(const n in FR) if(+n<=6) FR6[n]=FR[n];
     if(Object.keys(FR6).length){ const red=[...r.red]; Object.assign(red,assignRedsFixed(slots6,n=>r.sel[n].card,PREF,FR6)); r={...r,red}; }
-    const out=fillLower(r,child,{id,cids,st,tG,tD,tS,byCh,REQ,force:ov,faNeed,childFA,fixed:FR}); out.nfx=NF; return out; });
+    const NG={}; for(const n in NF){ const g=NF[n]&&NF[n].w?genesOfWhites(NF[n].w):null; if(g&&Object.keys(g).length) NG[n]=g; }
+    const out=fillLower(r,child,{id,cids,st,tG,tD,tS,byCh,REQ,force:ov,faNeed,childFA,fixed:FR,nfg:NG}); out.nfx=NF; return out; });
   bpCache.set(key,res); return res;
 }
 function fillLower(r,child,ctx){
   const chs=[...r.chs], red=r.red.map(x=>x&&{...x});
+  const NG=ctx.nfg||{}; const genesX=rd=>{ const g=genesOf(rd); for(const i in NG) if(+i>=1&&+i<=6) g[i]={...g[i],...NG[i]}; return g; }; // 読み込んだ「〇〇の遺伝子」（白因子）も継承イベントで適性を上げる
   const starsFor=(i,t)=>{ let a=0; for(const n of ANC_T[i]){ const r=red[n]; if(r&&r.t===t) a+=r.s; } return a; };
   const baseOf=(i,t)=>i===0?child.a[t]:i<=2?charBest(chs[i],t):charBestL(chs[i],t);
   // 親・祖親に「〇〇の遺伝子」（白因子）を付けるための赤因子配置：
@@ -1758,7 +1784,8 @@ function fillLower(r,child,ctx){
   // 親1系（7〜10）・親2系（11〜14）の赤因子の種類と、祖親ごとの第2世代下（4人）の種類を総当たりし、育成ウマ娘のS確率が最大になる組み合わせを選ぶ
   const FX=ctx.fixed||{}; const isFx=n=>!!FX[n]||!!FX[upOf(n)]||(upOf(n)>0&&!!FX[upOf(upOf(n))]); // 育成済み（画像で読み込んだ）枠とその親・祖は変えない
   const {tG,tD,tS}=ctx; let K=[tD,tS,tG].filter(t=>child.a[t]<8); if(!K.length) K=[tD];
-  const lackOK=()=>[1,2,3,4,5,6].every(i=>STAR_NEED[Math.max(0,7-baseOf(i,red[i].t))]<=starsFor(i,red[i].t));
+  const selCard=i=>(ctx.force&&ctx.force[i])||(r.sel&&r.sel[i]&&r.sel[i].card)||null; const holdBase=(i,t)=>{ const c=selCard(i); return c?cards[c].a[t]:baseOf(i,t); }; // 選んだ衣装の適性（キャラの最高値ではなく）
+  const lackOK=()=>[1,2,3,4,5,6].every(i=>FX[i]||STAR_NEED[Math.max(0,Math.min(4,7-holdBase(i,red[i].t)))]<=starsFor(i,red[i].t));
   let bestV=-Infinity, bestSet=null;
   const combos=[]; const rec=(a)=>{ if(a.length===6){combos.push(a); return;} for(const t of K) rec([...a,t]); }; rec([]);
   const R3=Array.from({length:10},(_,t)=>Object.freeze({t,s:3})); // 組み合わせの総当たりで毎回オブジェクトを作らない
@@ -1766,7 +1793,7 @@ function fillLower(r,child,ctx){
   for(const cb of combos){ const [T1,T2,U3,U4,U5,U6]=cb, T={1:T1,2:T2}, U={3:U3,4:U4,5:U5,6:U6};
     for(let m=7;m<15;m++){ const [gg,g,P]=GP_OF[m]; red[m]=R3[T[gg]]; for(const b of P) red[b]=R3[U[g]]; }
     for(const n in FX) red[n]={...FX[n],own:1};
-    const genes=genesOf(red,starsFor);
+    const genes=genesX(red);
     let v=[tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,genes),0);
     if(!lackOK()) v-=5;
     if(v>bestV){bestV=v; bestSet=cb;} }
@@ -1775,7 +1802,7 @@ function fillLower(r,child,ctx){
   // 親・祖親の赤因子は必ず☆3で取る前提：その枠の適性が育成開始時に確実にAになるよう、第2世代に同じ赤因子を置く（遺伝子の確率には頼らない）
   const holdSlot={}, holdFix={};
   { const cardOf=i=>(ctx.force&&ctx.force[i])||(r.sel&&r.sel[i]&&r.sel[i].card)||null;
-    const totalS=()=>{ const g=genesOf(red,starsFor); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0); };
+    const totalS=()=>{ const g=genesX(red); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0); };
     for(const i of [1,2,3,4,5,6]){ const c=cardOf(i); if(!c||FX[i]) continue; const t=red[i].t, b=cards[c].a[t]; if(b>=7) continue;
       const need=STAR_NEED[Math.min(4,7-b)]; let guard=0;
       while(starsFor(i,t)<need&&guard++<6){
@@ -1792,7 +1819,7 @@ function fillLower(r,child,ctx){
   { const cardOf=i=>(ctx.force&&ctx.force[i])||(r.sel&&r.sel[i]&&r.sel[i].card)||null;
     const dBase=i=>{ const c=cardOf(i); return c?cards[c].a[1]:charBest(chs[i],1); };
     const dNeed=i=>chs[i]===STAY_GOLD?2:3;
-    const totalS=()=>{ const g=genesOf(red,starsFor); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0)-(lackOK()?0:5); };
+    const totalS=()=>{ const g=genesX(red); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0)-(lackOK()?0:5); };
     for(const i of [1,2,3,4,5,6]){
       const b=dBase(i), want=dNeed(i); if(b>=want||FX[i]) continue;
       const needStars=STAR_NEED[Math.min(4,want-b)];
@@ -1811,7 +1838,7 @@ function fillLower(r,child,ctx){
   const midNote={}, midSlot={}, MIDW=5; let MIDSAFE=()=>true;
   { const cardOf=i=>(ctx.force&&ctx.force[i])||(r.sel&&r.sel[i]&&r.sel[i].card)||null;
     const mBase=i=>{ const c=cardOf(i); return c?cards[c].a[4]:charBest(chs[i],4); };
-    const totalS=()=>{ const g=genesOf(red,starsFor); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0)-(lackOK()?0:5); };
+    const totalS=()=>{ const g=genesX(red); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0)-(lackOK()?0:5); };
     const hardOK=()=>[1,2,3,4,5,6].every(j=>{ if(FX[j]) return true; const c=cardOf(j); const b=c?cards[c].a[red[j].t]:baseOf(j,red[j].t); return b>=7||STAR_NEED[Math.min(4,7-b)]<=starsFor(j,red[j].t); })&&Object.keys(dirtNote).every(j=>{ const c=cardOf(+j); const b=c?cards[c].a[1]:charBest(chs[+j],1); const w=chs[+j]===STAY_GOLD?2:3; return b>=w||Math.min(7,b+boostOf(starsFor(+j,1)))>=w||!/→/.test(dirtNote[j]); });
     const safe=(n,v)=>{ const keep=red[n]; red[n]=v; const ok=hardOK(); red[n]=keep; return ok; };
     MIDSAFE=safe;
@@ -1824,7 +1851,7 @@ function fillLower(r,child,ctx){
         red[best]={t:4,s:3}; midSlot[best]=i; }
       const post=Math.min(7,b+boostOf(starsFor(i,4)));
       midNote[i]=post>=MIDW?`中距離${LET[b]}→${LET[post]}：中距離G1（同一G1の相性ボーナス）に出走できるよう、第2世代に中距離の赤因子☆${starsFor(i,4)}を置いて育成開始時にC以上にする`:`中距離${LET[b]}：第2世代の枠が足りず、中距離Cまで上げられない（中距離G1に出走しにくい）`; } }
-  let genes=genesOf(red,starsFor);
+  let genes=genesX(red);
   // 第2世代：ダート・マイル・中距離・長距離の適性が高いウマ娘を優先（相性が大きく劣る場合のみ別候補＋理由を記載）
   const lowerCard=[], lowerNote=[];
   if(ctx.force) for(const k in ctx.force) if(+k>=7) chs[+k]=cards[ctx.force[k]].ch; // 手動で選んだ第2世代を先に置き、同じ家系の同名を防ぐ
@@ -1866,7 +1893,7 @@ function fillLower(r,child,ctx){
   }
   for(let i=7;i<15;i++){ const c=lowerCard[i]; if(!c||isFx(i)) continue; const b=cards[c].a[4]; if(b>=MIDW) continue; const post=Math.min(7,b+boostOf(starsFor(i,4)));
     (lowerNote[i]=lowerNote[i]||[]).push(post>=MIDW?`中距離${LET[b]}→${LET[post]}：親（第2世代下）の中距離の赤因子で育成開始時にC以上にする`:`中距離${LET[b]}：C未満（中距離G1に出走しにくい）`); }
-  genes=genesOf(red,starsFor);
+  genes=genesX(red);
   const byCh=ctx.byCh;
   const nodes=chs.map((ch,i)=>{
     let card; if(i===0) card=ctx.id; else if(ctx.force&&ctx.force[i]) card=ctx.force[i]; else if(i<=6&&r.sel&&r.sel[i]) card=r.sel[i].card; else if(i<=2) card=byCh[ch]?.card||bestCardFor(ch,red[i].t); else if(i<=6) card=byCh[ch]?.gpCard||bestLowerCardFor(ch,red[i].t); else card=lowerCard[i]||bestLowerCardFor(ch,red[i].t);
@@ -1878,26 +1905,31 @@ function fillLower(r,child,ctx){
     const x=byCh[ch]; let green=null;
     if(i>=1&&i<=6&&x){ const isP=i<=2; const v=isP?x.inh:x.gpInh; const sp=SPECIAL_INH[card];
       green={gate:canActivate(card,ctx.cids,ctx.st), why:gateWhy(card), name:cards[card].u[0][0], v:isP?(card===x.card?v:(x.vals?.[card]||0)):(card===x.gpCard?v:(x.vals?.[card]||0)), ac:[acS(card,ctx.st),(cards[card].ac||[1,[]])[1]], special:!!sp, evolved:!!sp&&isP, fa:faAll(card,ctx.cids,ctx.st)}; }
-    return {i,ch,card,rent:i>0&&!owned(card),base,post,red:red[i],hold,compat:nodeCompat(chs,i),green,route:routeOf(ch),genes:i>=1&&i<=6?genes[i]:null,geneStars:i>=1&&i<=6?Object.fromEntries(Object.keys(genes[i]).map(t=>[t,starsFor(i,+t)])):null,notes:i>=1&&i<=6?[...(red[i]?.alt?[`${APTN[red[i].alt.from]}が${LET[red[i].alt.a]}のため${APTN[red[i].alt.from]}の赤因子は狙わず、${APTN[red[i].t]}（${LET[cards[card].a[red[i].t]]}）の赤因子にする${red[i].alt.off?'（育成ウマ娘の目標適性には効かない）':''}`]:[]),...(i<=2&&x?.req?[x.req]:[]),...(i<=2&&x?.req?[]:notesFor(chs[0],ch)),...[holdNote(cards[card].a,red[i].t),dirtNote[i],midNote[i]].filter(Boolean)]:(lowerNote[i]||[])};
+    return {i,ch,card,rent:i>0&&!owned(card),base,post,red:red[i],hold,compat:nodeCompat(chs,i),green,route:routeOf(ch),genes:i>=1&&i<=6?genes[i]:null,geneOwn:i>=1&&i<=6?(NG[i]||null):null,geneStars:i>=1&&i<=6?Object.fromEntries(Object.keys(genes[i]).map(t=>[t,starsFor(i,+t)])):null,notes:i>=1&&i<=6?[...(red[i]?.alt?[`${APTN[red[i].alt.from]}が${LET[red[i].alt.a]}のため${APTN[red[i].alt.from]}の赤因子は狙わず、${APTN[red[i].t]}（${LET[cards[card].a[red[i].t]]}）の赤因子にする${red[i].alt.off?'（育成ウマ娘の目標適性には効かない）':''}`]:[]),...(i<=2&&x?.req?[x.req]:[]),...(i<=2&&x?.req?[]:notesFor(chs[0],ch)),...[holdNote(cards[card].a,red[i].t),dirtNote[i],midNote[i]].filter(Boolean)]:(lowerNote[i]||[])};
   });
   const src=[...parentsOf(0),...gpsOf(0)];
   const childStars=APTN.map((_,t)=>src.reduce((a,n)=>a+(red[n]&&red[n].t===t?red[n].s:0),0));
   const childStars2=APTN.map((_,t)=>src.reduce((a,n)=>a+(red[n]&&red[n].t===t?2:0),0));
   // 遺伝子（白因子）で適性をAに上げて赤因子を狙える枠：その枠を因子周回するとき、親が持つ「〇〇の遺伝子」が継承イベントで発動すると適性が1段階上がる
-  { const gAll={}; for(let i=1;i<15;i++){ gAll[i]={}; for(let t=0;t<10;t++){ const st=starsFor(i,t); const p=st>=12?1:st>=6?0.4:0; if(p) gAll[i][t]=p; } }
+  { const gAll={}; for(let i=1;i<31;i++){ gAll[i]={}; if(i<15) for(let t=0;t<10;t++){ const st=starsFor(i,t); const p=st>=12?1:st>=6?0.4:0; if(p) gAll[i][t]=p; } if(NG[i]) Object.assign(gAll[i],NG[i]); }
     for(const n of nodes){ if(n.i<1||n.i>=15||n.hold) continue; const t=n.red.t, post=n.post[t];
-      const src=parentsOf(n.i).filter(j=>j<15&&gAll[j]&&gAll[j][t]);
-      if(!src.length) continue;
-      const need=7-post; const pr=src.map(j=>gAll[j][t]);
-      const txt=src.map(j=>`${ROLE(j)}（${D.chars[chs[j]]}）の「${APTN[t]}の遺伝子」（${gAll[j][t]>=1?'確定':'40%'}）`).join('・');
-      // Aに届く確率：親・祖親の同じ赤因子と、親の遺伝子が継承イベントで発動する確率（ウマプランで2パターンから選択）
+      const P=parentsOf(n.i).filter(j=>j<31), G=gpsOf(n.i).filter(j=>j<31);
+      const srcP=P.filter(j=>gAll[j][t]), srcG=G.filter(j=>gAll[j][t]); // 下の世代が持つ「〇〇の遺伝子」（白因子）
+      const lowR=[...P,...G].filter(j=>red[j]&&red[j].t===t); // 下の世代が持つ同じ適性の赤因子
+      const nSrc=srcP.length+srcG.length;
+      if(!nSrc&&!(post>=6&&lowR.length)) continue;
+      const need=7-post;
+      const txt=[...srcP,...srcG].map(j=>`${ROLE(j)}（${D.chars[chs[j]]}）の「${APTN[t]}の遺伝子」（${NG[j]&&NG[j][t]?'所持':gAll[j][t]>=1?'確定':'40%'}）`).join('・')||'下の世代の赤因子';
+      // Aに届く確率：親・祖親の同じ赤因子と「〇〇の遺伝子」（白因子）が継承イベントで発動する確率（ウマプランで2パターンから選択。祖は親より発動しにくい）
       const mult=Math.max(0.3,Math.min(1.4,(100+n.compat)/251)); const qs=[];
-      for(const j of parentsOf(n.i)){ if(red[j]&&red[j].t===t) qs.push(RATE[red[j].s]*mult); if(j<15&&gAll[j]&&gAll[j][t]) qs.push(gAll[j][t]*GENE_RATE*mult); }
-      for(const j of gpsOf(n.i)) if(red[j]&&red[j].t===t) qs.push(RATE[red[j].s]*0.7*mult);
+      for(const j of P){ if(red[j]&&red[j].t===t) qs.push(RATE[red[j].s]*mult); if(gAll[j][t]) qs.push(gAll[j][t]*GENE_RATE*mult); }
+      for(const j of G){ if(red[j]&&red[j].t===t) qs.push(RATE[red[j].s]*0.7*mult); if(gAll[j][t]) qs.push(gAll[j][t]*GENE_RATE*0.7*mult); }
       const pA=probReach(qs,need); n.geneP=pA;
-      if(need<=src.length){ n.geneHold=true; n.hold=true;
-        n.notes=[...n.notes,`${APTN[t]} ${LET[post]}→A：この枠を因子周回するとき、${txt}が育成中の継承で${need>1?need+'回':''}発動すれば${APTN[t]}がA以上になり、赤因子「${APTN[t]}」を狙える（遺伝子で赤因子の指定が可能）。Aに届く確率 約${pct(pA)}（親・祖親の${APTN[t]}赤因子の継承も含む。${UMAPLAN_NOTE}）`]; }
-      else n.notes=[...n.notes,`${APTN[t]} ${LET[post]}：${txt}が発動しても1段階分しか上がらず、Aに届かない`]; } }
+      if(nSrc&&need<=nSrc){ n.geneHold=true; n.hold=true;
+        n.notes=[...n.notes,`${APTN[t]} ${LET[post]}→A：この枠を因子周回するとき、${txt}が育成中の継承で${need>1?need+'回':''}発動すれば${APTN[t]}がA以上になり、赤因子「${APTN[t]}」を狙える。Aに届く確率 約${pct(pA)}（親・祖親の${APTN[t]}赤因子の継承も含む。${UMAPLAN_NOTE}）`]; }
+      else if(post>=6&&lowR.length){ n.trainHold=true; n.hold=true;
+        n.notes=[...n.notes,`${APTN[t]} ${LET[post]}→A：下の世代（${lowR.map(j=>`${ROLE(j)}・${D.chars[chs[j]]}`).join('／')}）の${APTN[t]}の赤因子${nSrc?'や「'+APTN[t]+'の遺伝子」':''}が、この枠を育成するときの継承イベントで発動すれば${APTN[t]}がAに上がり、赤因子「${APTN[t]}」☆3を狙える。Aに届く確率 約${pct(pA)}（${UMAPLAN_NOTE}）`]; }
+      else n.notes=[...n.notes,`${APTN[t]} ${LET[post]}：${txt}が発動しても${nSrc}段階分しか上がらず、Aに届かない`]; } }
   const warn=nodes.filter(n=>n.i>0&&n.i<15&&!n.hold);
   // 同じ世代の2人がどちらも未所持（レンタルは片方まで）の組
   const rentBoth=[]; for(let k=0;k<15;k++){ const P=parentsOf(k); if(P.length===2&&nodes[P[0]].rent&&nodes[P[1]].rent) rentBoth.push(k); }
@@ -1914,7 +1946,7 @@ function renderBlueprints(id,cids,st,body){
   const bps=planBlueprints(id,cids,st);
   if(!bps.length){body.innerHTML='<div class="empty">候補が不足しています</div>'; return;}
   const {tG,tD,tS}=bps[0].ctx;
-  body.innerHTML=`<p class="muted" style="margin:0 0 10px;font-size:12px">親の組み合わせが異なる10案です（並び順：①相性値（同一G1込み）400以上 ②継承固有の獲得バ身 ③相性値）。必須の親などで400に届かない場合は、相性値ができるだけ高い案を優先します。カードをクリックすると設計図ページが開きます。継承固有は「発動しやすさ」を掛けて評価し、順位条件が厳しい固有は優先度を下げています。</p>
+  body.innerHTML=`<p class="muted" style="margin:0 0 10px;font-size:12px">親の組み合わせが異なる10案です（並び順：①相性値400以上（家系で同じG1をそろえた理想のG1ローテを走った場合の同一G1ボーナス込み）なら、このコースで強い継承固有（獲得バ身）を優先 ②相性値）。必須の親などで400に届かない場合は、相性値ができるだけ高い案を優先します。カードをクリックすると設計図ページが開きます。継承固有は「発動しやすさ」を掛けて評価し、順位条件が厳しい固有は優先度を下げています。</p>
   <div class="bpList">${bps.map((b,k)=>{
     const ok=[tG,tD,tS].map(t=>postApt(cards[id].a[t],b.childStars[t])>=7);
     const sp=b.nodes.slice(1,3).filter(n=>n.green?.evolved);
@@ -1944,7 +1976,7 @@ function closeBlueprintPage(fromPop){
 window.addEventListener('popstate',()=>{ if(location.hash!=='#blueprint'&&!$('#bpPage').hidden) closeBlueprintPage(true); });
 window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#bpPage').hidden) closeBlueprintPage(); });
 
-function redChip(n){ if(!n.red) return ''; if(n.red.own) return `<span class="pill p-red" title="読み込んだ因子（育成済み）">赤 ${APTN[n.red.t]}☆${n.red.s}（所持）</span>`; return `<span class="pill p-red${n.hold?'':' warn'}" title="${n.geneHold?'親の遺伝子が発動すれば適性がAになり取得できる':n.hold?(n.i<=6?'☆3で取る前提（育成開始時に適性A）':'この枠で取得できる'):'この枠の適性がAに届かず☆3で取れない'}">赤 ${APTN[n.red.t]}☆${n.red.s}${n.hold?'':' ⚠'}</span>${n.geneHold?'<span class="gchip" title="親が持つ遺伝子（白因子）が発動すれば適性がAになり、この赤因子を指定できる（${UMAPLAN_NOTE}）">遺伝子でA→赤因子可 ${pct(n.geneP||0)}</span>':''}`; }
+function redChip(n){ if(!n.red) return ''; if(n.red.own) return `<span class="pill p-red" title="読み込んだ因子（育成済み）">赤 ${APTN[n.red.t]}☆${n.red.s}（所持）</span>`; return `<span class="pill p-red${n.hold?'':' warn'}" title="${n.geneHold?'親の遺伝子が発動すれば適性がAになり取得できる':n.trainHold?'適性B：下の世代の同じ赤因子が育成中の継承で発動すればAに上がり取得できる':n.hold?(n.i<=6?'☆3で取る前提（育成開始時に適性A）':'この枠で取得できる'):'この枠の適性がAに届かず☆3で取れない'}">赤 ${APTN[n.red.t]}☆${n.red.s}${n.hold?'':' ⚠'}</span>${n.geneHold?`<span class="gchip" title="親が持つ遺伝子（白因子）が発動すれば適性がAになり、この赤因子を指定できる（${UMAPLAN_NOTE}）">遺伝子でA→赤因子可 ${pct(n.geneP||0)}</span>`:''}${n.trainHold?`<span class="gchip" title="適性B：下の世代が持つ同じ適性の赤因子が、育成中の継承イベントで発動すればAに上がる（${UMAPLAN_NOTE}）">育成中にA ${pct(n.geneP||0)}</span>`:''}`; }
 const skA=(cid,i,v)=>` class="skt" tabindex="0" data-skc="${cid}" data-ski="${i}" data-skv="${v||0}"`;
 function faBadge(b,short){ if(!b.faKnown) return short?'':'<span class="pill p-white" title="このコースは構成データが無いため判定できません">終盤加速：判定不可</span>';
   if(b.childFA){ const nm=cards[b.nodes[0].card].u[0]?.[0]; return `<span class="pill p-fa" title="育成ウマ娘本人の固有が終盤突入時に最速で発動する加速スキル">終盤加速 本人${short?'':'：'+esc(nm)}</span>`; }
@@ -1965,7 +1997,7 @@ function pageNode(bp,i,full){
   const mini=`<div class="mini">${n.red?`<span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span>`:''}${i>=1&&i<=6&&n.green?`<span class="pill p-green">${esc(n.green.name)}</span>`:''}${i>=1&&i<=6&&n.green&&n.green.fa?'<span class="pill p-fa">終盤加速</span>':''}${i===0?`<span class="pill p-pink">相性 ${n.compat+g1B(bp,0)}</span>`:''}</div>`;
   const wf=i>0?`<button type="button" class="wfBtn" data-wf="${i}" title="このウマ娘で取っておきたい白因子">白因子</button>`:'';
   const no=i>0?`<button type="button" class="noBtn" data-no="${i}" title="この枠のウマ娘を変更（一覧から選ぶ・未所持にする）">変更</button>`:'';
-  const gn=i>=1&&i<=6&&n.genes?Object.entries(n.genes).map(([t,p])=>`<span class="gchip" title="因子周回時、親・祖親の${APTN[t]}赤因子☆${n.geneStars[t]}">遺伝子 ${APTN[t]} ${p>=1?'確定':'40%'}</span>`).join(''):'';
+  const gn=i>=1&&i<=6&&n.genes?Object.entries(n.genes).map(([t,p])=>n.geneOwn&&n.geneOwn[t]?`<span class="gchip" title="読み込んだ白因子「${APTN[t]}の遺伝子」（育成ウマ娘の継承イベントで${APTN[t]}の適性を上げる）">遺伝子 ${APTN[t]} 所持</span>`:`<span class="gchip" title="因子周回時、親・祖親の${APTN[t]}赤因子☆${n.geneStars[t]}">遺伝子 ${APTN[t]} ${p>=1?'確定':'40%'}</span>`).join(''):'';
   const HT=n.rent?'<sup class="rent" title="未所持：フレンドからレンタルする前提">♥</sup>':'';
   if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Badge(bpG1(bp),i,upOf(i),true)}<button type="button" class="g1ed sm" data-g1ed="${i}" title="勝ったG1を選んでG1勝利数に反映する">🏆</button>${wf}${mini}</div>`;
   if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Badge(bpG1(bp),i,upOf(i),true)}<button type="button" class="g1ed sm" data-g1ed="${i}" title="勝ったG1を選んでG1勝利数に反映する">🏆</button>${wf}${nfBlock(bp,i,true)}${mini}<span class="pc">育成時の相性 <b>${n.compat+g1B(bp,i)}</b></span></div>`;
@@ -2092,7 +2124,7 @@ function bpText(bp){
     { const L=bpG1(bp)[i]||[]; if(L.length) parts.push(`G1 ${L.length}勝`); }
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 02:04`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 03:10`);
   return L.join('\n');
 }
 function saveCurrentBP(asPng){
@@ -2617,7 +2649,7 @@ const MY_ROLE=i=>i===0?'育成ウマ娘':i<=2?`親${i}`:i<=6?'祖':i<=14?'第2�
 // 赤因子による適性上昇：その枠の親・祖の同系統☆合計（1-3→+1 / 4-6→+2 / 7-9→+3 / 10以上→+4、上限A）
 function myStars(i){ const s=Array(10).fill(0); for(const j of ANC_T[i]||[]){ const r=my.n[j]&&my.n[j].r; if(r&&my.n[j].c) s[r.t]+=r.s; } return s; }
 function myNode(i){ const x=my.n[i]; if(!x.c) return null; const base=cards[x.c].a, st=myStars(i); return {base,post:base.map((b,t)=>postApt(b,st[t])),red:x.r,stars:st}; }
-const mySets=()=>my.n.map((x,i)=>{ const n=myNode(i); return n?g1Wins(myCh(i),n.post):[]; });
+const mySets=()=>my.n.map((x,i)=>{ const n=myNode(i); return n?g1Wins(myCh(i),g1Lift([...n.post])):[]; });
 const myG1=i=>g1BonusOf(mySets(),i);
 function myCompat(i){ return nodeCompat(myChs(),i)+myG1(i); }
 function myCompatParts(){ const c=myChs(), P=[1,2]; const pr=(a,b)=>c[a]&&c[b]&&c[a]!==c[b]?pair(c[a],c[b]):0;
@@ -2927,16 +2959,16 @@ let g1Draft=null;
 function openG1(i){ const bp=curBP(); if(!bp||!bp.nodes[i]) return; const n=bp.nodes[i]; nfDraft=null; impDraft=null; g1Draft={i,ch:n.ch,card:n.card,on:new Set((bpG1(bp)[i]||[]).filter(id=>!g1Block(n.ch,G1BY[id])))}; drawG1(); wfEl.hidden=false; }
 function drawG1(){ const G=g1Draft; if(!G) return; const bp=curBP(), n=bp.nodes[G.i], act=g1Act(bp,G.i), est=nodeG1(n,null).length;
   wfEl.innerHTML=`<div class="box nfBox g1Box"><div class="hd">${ava(n.ch,48,n.card)}<h3>勝ったG1を選ぶ<small>${esc(ROLE(G.i))}：${esc(D.chars[n.ch])} ${esc(cards[n.card].t)}</small></h3><button type="button" class="x" aria-label="閉じる">×</button></div>
-    <div class="nfG1"><div class="nfG1h"><span class="pill p-gold">勝ったG1</span><b>${G.on.size}勝</b><span class="muted small">${act?'実績を登録済み':'いまは育成シナリオの見込み（'+est+'勝）'}</span></div>
+    <div class="nfG1"><div class="nfG1h"><span class="pill p-gold">勝ったG1</span><b>${G.on.size}勝</b><span class="muted small">${act?'実績を登録済み':'いまは理想のG1ローテの見込み（'+est+'勝）'}</span></div>
     ${g1ChipsHTML(n.ch,G.on,'data-g1pick')}
-    <p class="muted small" style="margin:6px 0 0">因子周回でふつう出走する芝・ダートのマイル／中距離／長距離のG1（適性が足りるもの）と育成目標のG1を最初から選んであります。出走しなかった・勝てなかったレースを押して外し、「確定」でG1勝利数と相性（同一G1ボーナス）に反映します。灰色のレースは育成目標と同じ時期などで出走できないため選べません。</p></div>
+    <p class="muted small" style="margin:6px 0 0">理想のG1ローテ（芝・ダートのマイル／中距離／長距離のG1のうち、赤因子の継承で適性を2段階まで上げれば出られるもの＋育成目標のG1。家系の相手と同じG1をそろえる）を最初から選んであります。出走しなかった・勝てなかったレースを押して外し、「確定」でG1勝利数と相性（同一G1ボーナス）に反映します。灰色のレースは育成目標と同じ時期などで出走できないため選べません。</p></div>
     <div class="btnRow"><button type="button" class="svSave" data-g1ok>確定</button>${act?'<button type="button" class="pkNo" data-g1reset>見込みに戻す</button>':''}<button type="button" class="pkNo" data-g1all>すべて外す</button></div></div>`; }
 document.addEventListener('click',e=>{ const q=s=>e.target.closest&&e.target.closest(s); let b;
   if(b=q('[data-g1ed]')){ e.stopPropagation(); e.preventDefault(); openG1(+b.dataset.g1ed); return; }
   if(!g1Draft||!q('#wfModal')) return;
   if(b=q('[data-g1pick]')){ if(b.disabled) return; const id=+b.dataset.g1pick; if(g1Draft.on.has(id)) g1Draft.on.delete(id); else g1Draft.on.add(id); drawG1(); return; }
   if(q('[data-g1all]')){ g1Draft.on.clear(); drawG1(); return; }
-  if(q('[data-g1reset]')){ const i=g1Draft.i, cur={...(nfCur()[i]||{})}; delete cur.g1; const keep=!!(cur.b||cur.r||cur.g||(cur.w&&cur.w.length)||cur.pid); nfSet(i,keep?cur:null); g1Draft=null; wfEl.hidden=true; redrawBP(); toast('G1勝利数を育成シナリオの見込みに戻しました'); return; }
+  if(q('[data-g1reset]')){ const i=g1Draft.i, cur={...(nfCur()[i]||{})}; delete cur.g1; const keep=!!(cur.b||cur.r||cur.g||(cur.w&&cur.w.length)||cur.pid); nfSet(i,keep?cur:null); g1Draft=null; wfEl.hidden=true; redrawBP(); toast('G1勝利数を理想のG1ローテの見込みに戻しました'); return; }
   if(q('[data-g1ok]')){ const G=g1Draft, cur=nfCur()[G.i]||{}; nfSet(G.i,{...cur,c:cur.c||G.card,g1:g1Order(G.on)}); g1Draft=null; wfEl.hidden=true; redrawBP(); toast(`G1 ${G.on.size}勝を反映し、相性（同一G1）を計算し直しました`,4000); return; } },true);
 wfEl.addEventListener('click',e=>{ if(e.target===wfEl||e.target.closest('.x')) g1Draft=null; });
 // ---- 読み込み・編集ポップアップ ----
@@ -2945,14 +2977,14 @@ function openNF(i){ const bp=curBP(); if(!bp) return; const n=bp.nodes[i]; const
   const P=parentsOf(i).filter(j=>j<31); const mk=(j)=>{ const x=cur[j]; return {node:j,ch:bp.nodes[j]?bp.nodes[j].ch:null,card:bp.nodes[j]?bp.nodes[j].card:null,blue:x&&x.b?{...x.b}:null,red:x&&x.r?{...x.r}:null,green:x&&x.g?{s:x.g}:null,whites:x&&x.w?x.w.map(([n,s])=>({n,s,ok:true})):[],g1:x&&Array.isArray(x.g1)?[...x.g1]:null,g1q:[],pid:x&&x.pid||'',on:!!x}; };
   impDraft=null; nfDraft={i,secs:[mk(i),...P.map(mk)]}; nfDraft.secs[0].on=true; drawNF(); wfEl.hidden=false; }
 const G1SHORT=n=>(G1AL[n]||[])[0]||n;
-function nfEst(s){ const bp=curBP(); const n=bp&&bp.nodes[s.node]; if(!n||!s.ch) return []; return g1Wins(s.ch,s.card===n.card?(n.post||cards[n.card].a):cards[s.card].a); }
+function nfEst(s){ const bp=curBP(); const n=bp&&bp.nodes[s.node]; if(!n||!s.ch) return []; return g1Wins(s.ch,g1Lift([...(s.card===n.card?(n.post||cards[n.card].a):cards[s.card].a)])); }
 function nfG1On(s){ const S=Array.isArray(s.g1)?new Set(s.g1):new Set([...nfEst(s),...g1OfWhites(s.whites)]); for(const id of [...S]) if(!G1BY[id]||g1Block(s.ch,G1BY[id])) S.delete(id); return S; }
 // G1の選択チップ（芝・ダート別）。出走できないレース（牝馬限定・育成目標と同じ時期）は選べない
 function g1ChipsHTML(ch,on,attr,o){ o=o||{}; const q=o.q||new Set(), fw=o.fw||new Set(), O=objOf(ch);
   return [['芝',G1R.filter(r=>r[2]===1)],['ダート',G1R.filter(r=>r[2]===2)]].map(([lb,L])=>`<div class="nfG1r"><span class="muted small">${lb}</span>${L.map(r=>{ const bl=g1Block(ch,r), fo=O.forced.has(r[0]);
     return `<button type="button" class="g1t${!bl&&on.has(r[0])?' on':''}${q.has(r[0])?' q':''}${fw.has(r[0])?' f':''}${fo?' obj':''}"${bl?' disabled':''} ${attr}="${r[0]}" title="${esc(r[1])}（${['','ジュニア','クラシック','シニア'][+r[4][0]]}${r[4].length>1?'・シニア':''}級 ${G1MH[r[0]].replace('-1','月前半').replace('-2','月後半')}）${bl?'\n出走できません：'+esc(bl):''}${fo?'\n育成目標のレース':''}${q.has(r[0])?'\n着順が読み取れなかったレースです。勝っていなければ押して外してください':''}${fw.has(r[0])?'\n白因子あり（このレースに勝っている）':''}">${esc(G1SHORT(r[1]))}</button>`; }).join('')}</div>`).join(''); }
 function nfG1HTML(s){ const fw=g1OfWhites(s.whites), act=Array.isArray(s.g1), on=nfG1On(s), q=new Set(s.g1q||[]);
-  return `<div class="nfG1"><div class="nfG1h"><span class="pill p-gold">勝ったG1</span><b>${on.size}勝</b><span class="muted small">${act?'実績（戦績画像・手入力）を相性の計算に使います':'未入力：育成シナリオで勝てるG1の見込み'+(fw.size?'＋白因子のG1':'')+'を使います'}</span>${act?'<button type="button" class="lnk" data-nfg1reset>見込みに戻す</button>':''}</div>
+  return `<div class="nfG1"><div class="nfG1h"><span class="pill p-gold">勝ったG1</span><b>${on.size}勝</b><span class="muted small">${act?'実績（戦績画像・手入力）を相性の計算に使います':'未入力：理想のG1ローテの見込み'+(fw.size?'＋白因子のG1':'')+'を使います'}</span>${act?'<button type="button" class="lnk" data-nfg1reset>見込みに戻す</button>':''}</div>
     ${g1ChipsHTML(s.ch,on,'data-nfg1',{q,fw})}
     <p class="muted small" style="margin:4px 0 0">押すと「勝った／勝っていない」を切り替えます。親・祖との「同一G1」の相性ボーナスに使います（◆は白因子のあるレース、点線は着順が読めなかったレース、灰色は育成目標の関係などで出走できないレース）</p></div>`; }
 function nfSecHTML(s,k){ const role=k===0?`${ROLE(s.node)}（この枠）`:`継承元${k} → ${ROLE(s.node)}`; const chOpts=charIds.slice().sort((a,b)=>(D.chars[a]||'').localeCompare(D.chars[b]||'','ja')).map(ch=>`<option value="${ch}"${ch===s.ch?' selected':''}>${esc(D.chars[ch])}</option>`).join('');
