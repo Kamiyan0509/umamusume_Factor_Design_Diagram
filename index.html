@@ -416,6 +416,53 @@ body.dnd,body.dnd *{cursor:grabbing!important;user-select:none!important}
 #dndGhost{position:fixed;z-index:200;pointer-events:none;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:999px;background:var(--panel);color:var(--ink);border:2px solid var(--pink);box-shadow:0 8px 24px rgba(0,0,0,.25);font-weight:700;font-size:13px;transform:translate(12px,12px)}
 details.pnote summary{cursor:pointer;font-weight:700;list-style:none;color:var(--muted)}details.pnote summary::-webkit-details-marker{display:none}details.pnote:not([open]){padding-top:3px;padding-bottom:3px}details.pnote[open] summary{margin-bottom:3px}
 details.calcNote{margin-top:6px}details.calcNote summary{cursor:pointer;font-size:11.5px;color:var(--muted)}
+/* スマホ：設計図のタイルは要約だけ。タップで詳細シート */
+.pn .mini{display:none}
+#tileSheet{position:fixed;inset:0;z-index:90;background:rgba(20,24,30,.45);display:flex;align-items:flex-end;justify-content:center}
+#tileSheet[hidden]{display:none!important}
+#tileSheet .sh{background:var(--ground);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25);animation:shUp .18s ease-out}
+@keyframes shUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+#tileSheet .grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 8px}
+#tileSheet .shHd{display:flex;align-items:center;gap:8px;margin:0 2px 8px}#tileSheet .shHd b{font-size:15px}#tileSheet .shHd .x{margin-left:auto;font-size:22px;border:0;background:none;color:var(--muted);padding:4px 8px}
+#tileSheet .pn{box-shadow:none}#tileSheet .pn .noBtn{position:static;align-self:flex-start}
+@media (max-width:760px){
+  .bppTree .pn:not(.full) .tmbar,.bppTree .pn:not(.full) .pnote,.bppTree .pn:not(.full) .ag3,.bppTree .pn:not(.full) .pf,.bppTree .pn:not(.full) .gline,
+  .bppTree .pn:not(.full) .pc,.bppTree .pn:not(.full) .g1in,.bppTree .pn:not(.full) .wfBtn,.bppTree .pn:not(.full) .noBtn,.bppTree .pn:not(.full) .f4,
+  .bppTree .pn:not(.full) .ph small,.bppTree .pn:not(.full)>small,.bppTree .pn:not(.full) .xsb>.pill,.bppTree .pn:not(.full) .nt,.bppTree .pn:not(.full) .rdot,
+  .bppTree .pn:not(.full)>span[class^="rt-"],.bppTree .pn:not(.full) .pcB>.pf,.bppTree .pn:not(.full) .pcB{display:none!important}
+  .bppTree .pn:not(.full){padding:8px;gap:4px;cursor:pointer}
+  .bppTree .pn:not(.full) .mini{display:flex;flex-wrap:wrap;gap:3px}
+  .bppTree .pn:not(.full) .mini .pill{font-size:10.5px;padding:1px 6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bppTree .pn:not(.full) .ph img,.bppTree .pn:not(.full) .ph .ava{width:36px!important;height:36px!important}
+  .bppTree .pn:not(.full) .ph b{font-size:13px}
+  .bppTree .pn.par .pcols{display:contents}
+  .bppTree .tr.r2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bppTree .tr.r3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bppTree .tr.r4{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .bppTree .tr.r5{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .bppTree .pn.s:not(.full)>.pill,.bppTree .pn.s:not(.full)>.gchip,.bppTree .pn.s:not(.full)>span.rt-C,.bppTree .pn.s:not(.full)>span.rt-T{display:none!important}
+  .bppTree .pn.s:not(.full) b,.bppTree .pn.xs:not(.full) b{font-size:11px;line-height:1.25}
+  .bppTree .pn.s:not(.full),.bppTree .pn.xs:not(.full){padding:5px}
+  .legend{display:none}
+  .tapHint{display:block!important}
+}
+.tapHint{display:none;font-size:11.5px;color:var(--muted);margin:0 0 6px}
+.mtree{display:none}
+.mtree .mleg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:12px;font-size:10.5px;color:var(--muted)}.mtree .mleg span{display:inline-flex;align-items:center;gap:4px}.mtree .mleg .r{display:inline-block;width:12px;height:12px;border-radius:50%;border:3px solid}.mtree .mleg .fa{border-color:var(--orange)}.mtree .mleg .p1{border-color:var(--turf);border-radius:2px;border-width:0 0 3px}.mtree .mleg .p2{border-color:var(--blue);border-radius:2px;border-width:0 0 3px}
+.mtree .mlab{position:relative;height:18px;margin-bottom:4px}
+.mtree .mlab span{position:absolute;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;letter-spacing:.04em}
+.mtree .mbox{position:relative}
+.mtree svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.mtree svg path{fill:none;stroke-width:2.2;vector-effect:non-scaling-stroke;opacity:.75}
+.mnode{position:absolute;transform:translate(-50%,-50%);padding:0;border:0;background:none;border-radius:50%;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mnode img,.mnode>span:first-child{width:100%!important;height:100%!important;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--line)}
+.mnode.g0 img,.mnode.g0>span:first-child{box-shadow:0 0 0 2px var(--panel),0 0 0 5px var(--pink)}
+.mnode.g1 img,.mnode.g1>span:first-child{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--turf)}
+.mnode.fa img,.mnode.fa>span:first-child{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--orange)}
+.mnode.rent{opacity:.95}.mnode .mh{position:absolute;right:-4px;top:-6px;font-style:normal;font-size:12px;color:var(--heart);text-shadow:0 0 2px var(--panel)}
+.mnode.dragging{opacity:.4}.mnode.dropOk{outline:3px dashed var(--pink);outline-offset:4px}
+.mnode:active{transform:translate(-50%,-50%) scale(.94)}
+@media (max-width:760px){ .mtree{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 6px 14px} .bppTree{display:none} }
 #wfModal{position:fixed;inset:0;z-index:100;background:rgba(20,24,30,.45);display:grid;place-items:center;padding:16px}
 #wfModal[hidden]{display:none!important}
 .svTop{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;align-self:end}
@@ -791,7 +838,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 07:56`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 12:11`;
 
 
 // ---- キャラアイコン ----
@@ -1626,30 +1673,33 @@ function aptGrid(n,small){
     return `<span class="${up?'up':''}${isRed?' rt':''}" title="${APTN[t]} ${LET[b]}${up?'→'+LET[p]:''}"><i>${APTS[t]}</i><b class="L${p}">${LET[p]}</b></span>`;};
   return `<div class="ag3${small?' sm':''}">${AGROWS.map(([lab,ts])=>`<div class="agr"><em>${lab}</em><div class="agc c${ts.length}">${ts.map(cell).join('')}</div></div>`).join('')}</div>`;
 }
-function pageNode(bp,i){
+function pageNode(bp,i,full){
   const n=bp.nodes[i], cc=cards[n.card], nm=D.chars[n.ch]||cc.n;
-  const role=i===0?'育成ウマ娘':i<=2?`親${i}`:i<=6?`祖（親${i<=4?1:2}側）`:'';
+  const role=i===0?'育成ウマ娘':i<=2?`親${i}`:i<=6?`祖（親${i<=4?1:2}側）`:full?ROLE(i):'';
+  // スマホ用の一行要約（タップで詳細）
+  const mini=`<div class="mini">${n.red?`<span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span>`:''}${i>=1&&i<=6&&n.green?`<span class="pill p-green">${esc(n.green.name)}</span>`:''}${i>=1&&i<=6&&n.green&&n.green.fa?'<span class="pill p-fa">終盤加速</span>':''}${i===0?`<span class="pill p-pink">相性 ${n.compat+g1Bonus(0)}</span>`:''}</div>`;
   const wf=i>0?`<button type="button" class="wfBtn" data-wf="${i}" title="このウマ娘で取っておきたい白因子">白因子</button>`:'';
   const no=i>0?`<button type="button" class="noBtn" data-no="${i}" title="この衣装を持っていない場合はクリック（代案を表示）">未所持</button>`:'';
   const gn=i>=1&&i<=6&&n.genes?Object.entries(n.genes).map(([t,p])=>`<span class="gchip" title="因子周回時、親・祖親の${APTN[t]}赤因子☆${n.geneStars[t]}">遺伝子 ${APTN[t]} ${p>=1?'確定':'40%'}</span>`).join(''):'';
   const HT=n.rent?'<sup class="rent" title="未所持：フレンドからレンタルする前提">♥</sup>':'';
-  if(i>=15) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Input(i,true)}${wf}</div>`;
-  if(i>=7) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Input(i,true)}${wf}<span class="pc">育成時の相性 <b data-cmp="${i}" data-base="${n.compat}">${n.compat+g1Bonus(i)}</b></span></div>`;
-  return `<div class="pn ${i===0?'me':i<=2?'par':'gp'}${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}
+  if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Input(i,true)}${wf}${mini}</div>`;
+  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Input(i,true)}${wf}${mini}<span class="pc">育成時の相性 <b data-cmp="${i}" data-base="${n.compat}">${n.compat+g1Bonus(i)}</b></span></div>`;
+  return `<div class="pn ${i===0?'me':i<=2?'par':i<=6?'gp':'gp lo'}${full?' full':''}${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}
     <div class="pcols"><div class="pcA">
     <div class="ph">${ava(n.ch,i===0?60:48,n.card)}<span class="role">${role}${n.rent?'<span class="rentTag">レンタル</span>':''}</span><b>${esc(nm)}${HT}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}</div>
+    ${full?'':mini}
     ${i<=6&&curCtx?timingBar(n.card,curCtx.cids,curCtx.st,i===0):''}
     ${i>=1&&n.notes.length?`<details class="pnote"${n.notes.some(t=>/必須/.test(t))?' open':''}><summary>ⓘ 選定メモ（${n.notes.length}）</summary>${n.notes.map(t=>esc(t)).join('<br>')}</details>`:''}
     ${aptGrid(n)}
     </div><div class="pcB">
-    <div class="pf">${i===0?`<span class="pill p-pink">相性 <b data-cmp="0" data-base="${n.compat}">${n.compat+g1Bonus(0)}</b></span>`:(curBF?blueChip(curBF.alloc[i]):'')+redChip(n)}</div>
+    <div class="pf">${i===0?`<span class="pill p-pink">相性 <b data-cmp="0" data-base="${n.compat}">${n.compat+g1Bonus(0)}</b></span>`:(curBF&&curBF.alloc[i]?blueChip(curBF.alloc[i]):'')+redChip(n)}</div>
     ${greenChip(n)}
     ${gn?`<div class="pf">${gn}</div>`:''}
     ${i>0&&isR(n.ch)?`<div class="pf"><span class="pill p-white" title="${esc(restrNote(n.ch))}">出走制限あり・特殊ローテで周回</span></div>`:''}
     ${wf?`<div class="pf">${wf}</div>`:''}
     ${i>=1&&i<=6&&curSP&&curSP.alloc[i]&&curSP.alloc[i].length?`<div class="pf">${curSP.alloc[i].map(w=>`<span class="pill p-white skt" tabindex="0" data-wsk="${esc(w.n)}">白 ${esc(w.n)}</span>`).join('')}</div>`:''}
     ${i>0?g1Input(i):''}
-    ${i>0?`<div class="pc">この枠を育成するときの相性 <b data-cmp="${i}" data-base="${n.compat}">${n.compat+g1Bonus(i)}</b></div>`:''}
+    ${i>0&&i<15?`<div class="pc">この枠を育成するときの相性 <b data-cmp="${i}" data-base="${n.compat}">${n.compat+g1Bonus(i)}</b></div>`:''}
   </div></div></div>`;
 }
 let curBF=null, curSP=null, curCtx=null;
@@ -1749,7 +1799,7 @@ function bpText(bp){
     if(state.g1[i]) parts.push(`同一G1 ${state.g1[i]}勝`);
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 07:56`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 12:11`);
   return L.join('\n');
 }
 function saveCurrentBP(){
@@ -2010,7 +2060,7 @@ document.addEventListener('click',e=>{ const t=e.target; if(!t.closest) return;
 },true);
 document.addEventListener('change',e=>{ if(e.target&&e.target.id==='updFile'&&e.target.files[0]){ const r=new FileReader(); r.onload=()=>{ try{ updReceive(JSON.parse(r.result)); }catch(err){ toast('読み込めないファイルです'); } }; r.readAsText(e.target.files[0]); } });
 
-function redrawBP(){ const y=window.scrollY; drawBlueprintPage(); window.scrollTo(0,y); }
+function redrawBP(){ const y=window.scrollY; const ts=document.getElementById('tileSheet'); if(ts) ts.hidden=true; drawBlueprintPage(); window.scrollTo(0,y); }
 document.addEventListener('click',e=>{
   const nb=e.target.closest&&e.target.closest('[data-no]');
   if(nb){ e.stopPropagation(); const i=+nb.dataset.no; const bp=curBP(); if(!bp) return; const n=bp.nodes[i], cc=cards[n.card];
@@ -2033,6 +2083,20 @@ document.addEventListener('click',e=>{
 },true);
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-wf]'); if(!b) return; e.stopPropagation(); openWF(+b.dataset.wf); },true);
 window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!wfEl.hidden){ wfEl.hidden=true; e.stopImmediatePropagation(); } },true);
+// ---------- スマホ用：キャラ画像だけの家系図（左＝本人 → 右＝第2世代下） ----------
+function mtreeHTML(bp){
+  const X=[9,31,53,73,91], SZ=[54,46,40,34,30], ROW=40, H=16*ROW;
+  const gen=i=>i===0?0:i<3?1:i<7?2:i<15?3:4;
+  const Y=[]; for(let j=0;j<16;j++) Y[15+j]=j*ROW+ROW/2; for(let i=14;i>=0;i--) Y[i]=(Y[2*i+1]+Y[2*i+2])/2;
+  const side=i=>{ while(i>2) i=Math.floor((i-1)/2); return i; };
+  let paths='';
+  for(let i=0;i<15;i++) for(const c of [2*i+1,2*i+2]){ const xp=X[gen(i)], xc=X[gen(c)], xm=(xp+xc)/2; const col=i===0?(c===1?'var(--turf)':'var(--blue)'):side(c)===1?'var(--turf)':'var(--blue)';
+    paths+=`<path d="M${xp} ${Y[i]}H${xm}V${Y[c]}H${xc}" stroke="${col}"/>`; }
+  const nodes=bp.nodes.map((n,i)=>{ const g=gen(i), s=SZ[g];
+    return `<button type="button" class="mnode g${g}${n.rent?' rent':''}${i>=1&&i<=6&&n.green&&n.green.fa?' fa':''}" data-i="${i}"${i>0?' data-dnd="1"':''} style="left:${X[g]}%;top:${Y[i]}px;width:${s}px;height:${s}px" aria-label="${esc(ROLE(i))}：${esc(D.chars[n.ch])}">${ava(n.ch,s,n.card)}${n.rent?'<i class="mh">♥</i>':''}</button>`; }).join('');
+  const lab=['本人','親','祖親','2世代上','2世代下'].map((t,g)=>`<span style="left:${X[g]}%">${t}</span>`).join('');
+  return `<div class="mlab">${lab}</div><div class="mbox" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${nodes}</div><div class="mleg"><span><i class="r fa"></i>終盤加速の継承固有</span><span><i class="r p1"></i>親1の系統</span><span><i class="r p2"></i>親2の系統</span><span><b style="color:var(--heart)">♥</b>レンタル</span></div>`;
+}
 function drawBlueprintPage(){
   const id=state.sel, cids=state.cids, st=state.style; curBF=blueFactors(id,cids,st); curSP=skillPlan(id,cids,st); curCtx={cids,st}; const bps=planBlueprints(id,cids,st); const bp=bps[state.bpIdx]; if(!bp) return;
   const co=courses[cids[0]], child=cards[id], {tG,tD,tS}=bp.ctx;
@@ -2066,7 +2130,7 @@ function drawBlueprintPage(){
         <section><h4>青因子（サポカ編成から算出）</h4>${blueSummary(curBF)}</section>
       </div>
       <div class="legend"><span class="tm tm-0 tk-acc">序盤加速</span><span class="tm tm-1 tk-spd">中盤速度</span><span class="tm tm-2 tk-acc">終盤加速</span>継承固有の発動タイミング（コース構成から最も早く発動できる地点で判定） <span class="pill p-blue">青</span>ステータス <span class="pill p-red">赤</span>適性 <span class="pill p-green">緑</span>継承固有 <span class="pill p-white">白</span>スキル <span class="rt-C">クラシック</span><span class="rt-T">ティアラ</span>路線 <span class="lg-up">A</span>赤因子で上昇 <span class="lg-rt">A</span>持たせる赤因子 <span class="nt">ⓘ</span>選定理由あり</div>
-      <div class="bppTree" id="bppTree"><svg class="lines" id="bppLines" aria-hidden="true"></svg>
+      <p class="tapHint">キャラをタップすると詳細（適性・因子・白因子・選定メモ）を表示。長押しして別のキャラに重ねると入れ替え</p><div class="mtree" id="mtree">${mtreeHTML(bp)}</div><div class="bppTree" id="bppTree"><svg class="lines" id="bppLines" aria-hidden="true"></svg>
         <div class="tr r1"><span class="rl">育成ウマ娘</span>${pageNode(bp,0)}</div>
         <div class="tr r2"><span class="rl">親世代</span>${[1,2].map(i=>pageNode(bp,i)).join('')}</div>
         <div class="tr r3"><span class="rl">祖親世代</span>${[3,4,5,6].map(i=>pageNode(bp,i)).join('')}</div>
@@ -2188,7 +2252,7 @@ function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk);
 // ---------- 設計図：タイルをドラッグして別の枠と入れ替え → 赤因子・遺伝子・第2世代を即座に最適化し直す ----------
 // ブラウザ標準のドラッグ＆ドロップは環境（埋め込み表示・画像や文字の上など）で効かないことがあるため、マウス／タッチの移動で自前で処理する
 (()=>{ let st=null, ghost=null, over=null, raf=0, lastY=0, suppressClick=false;
-  const tileAt=(x,y)=>{ const el=document.elementFromPoint(x,y); const t=el&&el.closest&&el.closest('#bpPage .pn[data-dnd]'); return t||null; };
+  const tileAt=(x,y)=>{ const el=document.elementFromPoint(x,y); const t=el&&el.closest&&el.closest('#bpPage [data-dnd]'); return t&&t.offsetParent?t:null; };
   const autoScroll=()=>{ if(!ghost){ raf=0; return; } const m=60, h=innerHeight; let dy=0; if(lastY<m) dy=-Math.ceil((m-lastY)/4); else if(lastY>h-m) dy=Math.ceil((lastY-(h-m))/4); if(dy) window.scrollBy(0,dy); raf=requestAnimationFrame(autoScroll); };
   const begin=e=>{ const t=st.tile; t.classList.add('dragging'); document.body.classList.add('dnd');
     const n=curBP()&&curBP().nodes[st.i]; ghost=document.createElement('div'); ghost.id='dndGhost'; ghost.innerHTML=n?`${ava(n.ch,28,n.card)}<span>${esc(D.chars[n.ch])}</span>`:''; document.body.appendChild(ghost);
@@ -2200,8 +2264,8 @@ function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk);
   const end=e=>{ if(!st) return; const a=st.i, dragged=!!ghost; const target=over;
     st.tile.classList.remove('dragging'); over&&over.classList.remove('dropOk'); ghost&&ghost.remove(); ghost=null; over=null; st=null; document.body.classList.remove('dnd'); cancelAnimationFrame(raf); raf=0;
     if(dragged){ suppressClick=true; setTimeout(()=>suppressClick=false,0); if(target) swapTiles(a,+target.dataset.i); } };
-  document.addEventListener('pointerdown',e=>{ if(e.button!==0) return; const t=e.target.closest&&e.target.closest('#bpPage .pn[data-dnd]'); if(!t) return;
-    if(e.target.closest('input,button,select,textarea,a,.skt,details')) return;
+  document.addEventListener('pointerdown',e=>{ if(e.button!==0) return; const t=e.target.closest&&e.target.closest('#bpPage [data-dnd]'); if(!t) return;
+    if(e.target.closest('input,button:not(.mnode),select,textarea,a,.skt,details')) return;
     st={tile:t,i:+t.dataset.i,x:e.clientX,y:e.clientY,t:Date.now(),touch:e.pointerType==='touch'}; if(!st.touch) e.preventDefault(); });
   document.addEventListener('pointermove',move,{passive:false});
   document.addEventListener('pointerup',end); document.addEventListener('pointercancel',e=>{ if(st&&!ghost) st=null; else end(e); });
@@ -2215,6 +2279,17 @@ function swapTiles(a,b){ const bp=curBP(); if(!bp) return; const A=bp.nodes[a], 
   toast(`${ROLE(a)}の${D.chars[A.ch]} ⇄ ${ROLE(b)}の${D.chars[B.ch]} を入れ替え、赤因子・遺伝子・第2世代を組み直しました（相性合計 ${bp.compat}→${nb.compat}・継承固有 ${bp.gsum.toFixed(2)}→${nb.gsum.toFixed(2)}バ）${req.length?`。※${req.join('・')}はこのコースでは親に必須です`:''}`,7000); }
 // ホーム画面アプリ（PWA）版：オフラインでも開けるようにキャッシュする
 try{ if(window.UMA_PWA&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){}
+// ---------- スマホ：タイルをタップ → 詳細シート ----------
+const isMobile=()=>matchMedia('(max-width:760px)').matches;
+function openTileSheet(i){ const bp=curBP(); if(!bp) return; let el=document.getElementById('tileSheet');
+  if(!el){ el=document.createElement('div'); el.id='tileSheet'; el.hidden=true; document.body.appendChild(el);
+    el.addEventListener('click',e=>{ if(e.target===el||e.target.closest('.shHd .x')) el.hidden=true; }); }
+  const n=bp.nodes[i];
+  el.innerHTML=`<div class="sh" role="dialog" aria-label="${esc(ROLE(i))}の詳細"><div class="grab"></div><div class="shHd"><b>${esc(ROLE(i))}：${esc(D.chars[n.ch])}</b><button type="button" class="x" aria-label="閉じる">×</button></div>${pageNode(bp,i,true)}</div>`;
+  el.hidden=false; }
+document.addEventListener('click',e=>{ if(!isMobile()) return; const t=e.target.closest&&e.target.closest('#bpPage .bppTree .pn[data-i], #bpPage .mtree .mnode'); if(!t) return;
+  if(e.target.closest('input,button:not(.mnode),select,a,.skt,details')) return; openTileSheet(+t.dataset.i); });
+addEventListener('keydown',e=>{ if(e.key==='Escape'){ const el=document.getElementById('tileSheet'); if(el&&!el.hidden) el.hidden=true; } });
 renderOwn();
 refresh();
 })();
