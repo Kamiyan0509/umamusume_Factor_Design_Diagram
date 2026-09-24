@@ -547,6 +547,14 @@ details.calcNote{margin-top:6px}details.calcNote summary{cursor:pointer;font-siz
 
 .bpDeck{margin:0 0 12px}.bpDeck>summary h3.sec{color:var(--pink)}
 .bppMain>.bpDeck{grid-column:1/-1}
+.g1c{display:inline-flex;align-items:baseline;gap:2px;font-size:11.5px;font-weight:700;color:#8a5a00;background:var(--gold-soft);border:1px solid #e3c46a;border-radius:999px;padding:1px 9px;cursor:help;align-self:flex-start;white-space:nowrap}
+.g1c b{font-family:var(--mono);font-size:13px}.g1c.sm{font-size:10px;padding:0 6px}.g1c.sm b{font-size:11px}.g1c.none{color:var(--muted);background:var(--ground);border-color:var(--line)}
+#skTip .g1l{list-style:none;margin:6px 0 0;padding:0;max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:3px}
+#skTip .g1l li{display:grid;grid-template-columns:64px 1fr auto;gap:8px;align-items:center;border-radius:6px;padding:2px 4px}
+#skTip:has(.g1l.two){max-width:620px}#skTip .g1l.two{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}#skTip .g1l.two li.yr{grid-column:1/-1}
+#skTip .g1l li.sh{background:var(--gold-soft)}#skTip .g1l li.yr{display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-top:4px;padding:0}
+#skTip .g1l b{display:block;font-size:12px;line-height:1.25}#skTip .g1l small{display:block;font-size:10.5px;color:var(--muted)}#skTip .g1l em{font-style:normal;font-size:10px;font-weight:700;color:#8a5a00}
+#skTip .g1i{display:block;width:64px;height:32px;border-radius:4px;background:linear-gradient(135deg,#2e7453,#1e4f39);overflow:hidden}#skTip .g1i img{width:100%;height:100%;object-fit:cover;display:block}
 /* ---------- 自作設計図 ---------- */
 body.my-open .wrap > :not(#myPage){display:none}
 #myPage[hidden]{display:none!important}
@@ -933,7 +941,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 16:02`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 16:32`;
 
 
 // ---- キャラアイコン ----
@@ -1296,9 +1304,11 @@ function renderSub(){
   const green=(cid,gp)=>{const nm=card(cid)?.u[0]?.[0]; const x=byCh[card(cid).ch]; const v=gp?(x?.gpInh||0):(x?.inh||0); return nm?`<span class="pill p-green skt" tabindex="0" data-skc="${cid}" data-ski="${gp?3:1}" data-skv="${v||0}">緑 ${esc(nm)}${v?' '+v.toFixed(2)+'バ':''} <i class="ski">ⓘ</i></span>${!gp&&x?.sp?'<span class="pill p-gold">特殊継承・親で進化</span>':''}`:'';};
   const gpCard=g=>byCh[g]?.gpCard||lowerCards(g)[0];
   const gps=[...best.g1.map(x=>[best.p1,x]),...best.g2.map(x=>[best.p2,x])];
+  const chAptMax=ch=>Array.from({length:10},(_,t)=>charBest(ch,t)); const t7=[child.ch,best.p1.ch,best.p2.ch,...best.g1.map(x=>x.g),...best.g2.map(x=>x.g)];
+  const TS=t7.map((ch,k)=>k===0?[]:g1Wins(ch,chAptMax(ch))); const tB=g1BonusOf(TS,0);
   body.innerHTML=`
-  <div class="compat"><div><b>相性合計 <span data-cmp="0" data-base="${best.compat}">${best.compat+g1Bonus(0)}</span></b><div class="muted" style="font-size:12px">子×親 ${pair(child.ch,best.p1.ch)} + ${pair(child.ch,best.p2.ch)}・親×親 ${pair(best.p1.ch,best.p2.ch)}・子×親×祖父母 ${[...best.g1,...best.g2].map(x=>x.t).join(' + ')}・同一G1 <span data-g1sum="0">+${g1Bonus(0)}</span></div></div></div>
-  <div class="g1row"><span class="muted small">同一G1勝利数（1勝につき+${G1PT}）</span>${[['親1',1],['親2',2],['祖1',3],['祖2',4],['祖3',5],['祖4',6]].map(([l,i])=>`<span class="g1cell">${l} ${g1Input(i,true)}</span>`).join('')}</div>
+  <div class="compat"><div><b>相性合計 <span>${best.compat+tB}</span></b><div class="muted" style="font-size:12px">子×親 ${pair(child.ch,best.p1.ch)} + ${pair(child.ch,best.p2.ch)}・親×親 ${pair(best.p1.ch,best.p2.ch)}・子×親×祖父母 ${[...best.g1,...best.g2].map(x=>x.t).join(' + ')}・同一G1 <span>+${tB}</span></div></div></div>
+  <div class="g1row"><span class="muted small">周回で勝つG1（同じG1 1レースにつき相性+${G1PT}）</span>${[['親1',1,0],['親2',2,1],['祖1',3,1],['祖2',4,1],['祖3',5,2],['祖4',6,2]].map(([l,i,pt])=>`<span class="g1cell">${l} ${g1Badge(TS,i,i<=2?3-i:pt,true)}</span>`).join('')}</div>
   <div class="tree" style="margin-top:12px">
     ${node('育成するウマ娘',child.ch,id,timingBar(id,cids,st,true)+`<span class="pill p-pink">${STY[st]}</span><span class="pill p-white">${esc(co.name)}</span>`,'child')}
     <div class="link"></div>
@@ -1334,8 +1344,53 @@ const G1PT=3;
 try{ const g=JSON.parse(null||'[]'); state.g1=Array.from({length:31},(_,i)=>Math.max(0,Math.min(99,+g[i]||0))); }catch(e){ state.g1=Array(31).fill(0); }
 const saveG1=()=>{ try{ void(JSON.stringify(state.g1)); }catch(e){} };
 const g1Src=i=>[2*i+1,2*i+2,4*i+3,4*i+4,4*i+5,4*i+6].filter(x=>x<31); // その枠の親2人＋祖4人
-const g1Bonus=i=>g1Src(i).reduce((a,n)=>a+(state.g1[n]||0)*G1PT,0);
 const g1Input=(i,small)=>`<label class="g1in${small?' sm':''}" title="この枠のウマ娘の同一G1勝利数（1勝につき相性+${G1PT}）">${small?'G1':'同一G1'} <input type="number" min="0" max="99" inputmode="numeric" data-g1="${i}" value="${state.g1[i]||0}">${small?'':'勝'}</label>`;
+// ---------- G1：因子周回で勝てるG1（育成シナリオのG1 34レース。GameTora のレースデータより） ----------
+// [レースID, 名前, 1=芝/2=ダート, 距離, 出走できる年（1=ジュニア 2=クラシック 3=シニア）, 開催場ID, 牝馬限定]
+const G1R=[[1001,'フェブラリーステークス',2,1600,'3',10006],[1002,'高松宮記念',1,1200,'3',10007],[1003,'大阪杯',1,2000,'3',10009],[1004,'桜花賞',1,1600,'2',10009,1],
+ [1005,'皐月賞',1,2000,'2',10005],[1006,'天皇賞（春）',1,3200,'3',10008],[1007,'NHKマイルカップ',1,1600,'2',10006],[1008,'ヴィクトリアマイル',1,1600,'3',10006,1],
+ [1009,'オークス',1,2400,'2',10006,1],[1010,'東京優駿（日本ダービー）',1,2400,'2',10006],[1011,'安田記念',1,1600,'23',10006],[1012,'宝塚記念',1,2200,'23',10009],
+ [1013,'スプリンターズステークス',1,1200,'23',10005],[1014,'秋華賞',1,2000,'2',10008,1],[1015,'菊花賞',1,3000,'2',10008],[1016,'天皇賞（秋）',1,2000,'23',10006],
+ [1017,'エリザベス女王杯',1,2200,'23',10008,1],[1018,'マイルチャンピオンシップ',1,1600,'23',10008],[1019,'ジャパンカップ',1,2400,'23',10006],[1020,'チャンピオンズカップ',2,1800,'23',10007],
+ [1021,'阪神ジュベナイルフィリーズ',1,1600,'1',10009,1],[1022,'朝日杯フューチュリティステークス',1,1600,'1',10009],[1023,'有馬記念',1,2500,'23',10005],[1024,'ホープフルステークス',1,2000,'1',10005],
+ [1101,'帝王賞',2,2000,'3',10101],[1102,'ジャパンダートダービー',2,2000,'2',10101],[1103,'JBCレディスクラシック',2,1800,'23',10101,1],[1104,'JBCスプリント',2,1200,'23',10101],
+ [1105,'JBCクラシック',2,2000,'23',10101],[1106,'東京大賞典',2,2000,'23',10101],[1107,'川崎記念',2,2100,'3',10103],[1108,'全日本ジュニア優駿',2,1600,'1',10103],
+ [1109,'かしわ記念',2,1600,'3',10104],[1110,'マイルチャンピオンシップ南部杯',2,1600,'23',10105]];
+const G1MH={1001:'2-2',1002:'3-2',1003:'3-2',1004:'4-1',1005:'4-1',1006:'4-2',1007:'5-1',1008:'5-1',1009:'5-2',1010:'5-2',1011:'6-1',1012:'6-2',1013:'9-2',1014:'10-2',1015:'10-2',1016:'10-2',1017:'11-1',1018:'11-2',1019:'11-2',1020:'12-1',1021:'12-1',1022:'12-1',1023:'12-2',1024:'12-2',1101:'6-2',1102:'7-1',1103:'11-1',1104:'11-1',1105:'11-1',1106:'12-2',1107:'2-1',1108:'12-2',1109:'5-1',1110:'10-1'}; // 開催時期（月-前半1/後半2）
+const G1BY=Object.fromEntries(G1R.map(r=>[r[0],r]));
+// 同じターン（年・月・前後半）には1レースしか出られない。路線（クラシック/ティアラ）に合わせた優先順で、出られるG1をできるだけ多く組む
+const G1_PRI_C=[1005,1010,1015,1023,1019,1016,1012,1003,1006,1011,1018,1007,1013,1002,1024,1022,1021,1008,1017,1004,1009,1014,1102,1106,1105,1020,1001,1101,1110,1109,1107,1104,1103,1108];
+const G1_PRI_T=[1004,1009,1014,1021,1008,1017,1023,1019,1016,1012,1003,1006,1011,1018,1005,1010,1015,1007,1013,1002,1024,1022,1103,1102,1106,1105,1020,1001,1101,1110,1109,1107,1104,1108];
+const g1Slots=r=>r[4].split('').map(y=>{ const [m,h]=G1MH[r[0]].split('-'); return +y*100+(+m)*2+(+h); });
+const G1MEMO=new Map();
+const TRK={10001:'札幌',10002:'函館',10003:'新潟',10004:'福島',10005:'中山',10006:'東京',10007:'中京',10008:'京都',10009:'阪神',10010:'小倉',10101:'大井',10103:'川崎',10104:'船橋',10105:'盛岡'};
+const G1_YR={1:'ジュニア',2:'クラシック',3:'シニア'};
+const g1Cat=m=>m<=1400?2:m<=1800?3:m<=2400?4:5;
+const G1_IMG=id=>`https://media.gametora.com/umamusume/races/banners/${id}.png`;
+// 勝てる条件：バ場（芝C以上・ダートE以上）と距離（C以上）の適性（その枠の親・祖の赤因子で上がった後の適性）、牝馬限定レースは牝馬のみ
+const isFemale=ch=>((D.route||{})[ch]||[])[1]==='F';
+function g1Wins(ch,apt){ if(!ch||!apt) return []; const key=ch+'|'+apt.join(''); if(G1MEMO.has(key)) return G1MEMO.get(key); const f=isFemale(ch);
+  const ok=new Set(G1R.filter(r=>(!r[6]||f)&&apt[r[2]===1?0:1]>=(r[2]===1?5:3)&&apt[g1Cat(r[3])]>=5).map(r=>r[0]));
+  const pri=(routeOf(ch)==='T'||(!routeOf(ch)&&f)?G1_PRI_T:G1_PRI_C).filter(id=>ok.has(id));
+  const owner=new Map(); // ターン → レース（増加路で最大マッチング：優先順の高いレースから入れる）
+  const tryPut=(id,seen)=>{ for(const sl of g1Slots(G1BY[id])){ if(seen.has(sl)) continue; seen.add(sl); const o=owner.get(sl); if(o==null||tryPut(o,seen)){ owner.set(sl,id); return true; } } return false; };
+  const won=[]; for(const id of pri) if(tryPut(id,new Set())) won.push(id);
+  const out=G1R.map(r=>r[0]).filter(id=>won.includes(id)); G1MEMO.set(key,out); return out; }
+// 同一G1の相性ボーナス：その枠の「親1×親2」「親×その親（祖）」の組ごとに、両方が勝ったG1 1レースにつき +3（2回出られるレースは1回だけ数える）
+function g1PairsOf(i){ const P=parentsOf(i); const out=[]; if(P.length===2) out.push([P[0],P[1]]); for(const p of P) for(const g of parentsOf(p)) out.push([p,g]); return out; }
+const g1Shared=(a,b)=>{ const B=new Set(b); return a.filter(x=>B.has(x)); };
+function bpG1(bp){ if(!bp) return []; if(!bp._g1) bp._g1=bp.nodes.map(n=>n?g1Wins(n.ch,n.post||cards[n.card].a):[]); return bp._g1; }
+function g1BonusOf(sets,i){ let s=0; for(const [a,b] of g1PairsOf(i)) if(sets[a]&&sets[b]) s+=g1Shared(sets[a],sets[b]).length; return s*G1PT; }
+const g1B=(bp,i)=>bp?g1BonusOf(bpG1(bp),i):0;
+// 設計図のタイルに出す「G1 ◯勝」（ホバーで出走するG1一覧）
+function g1Badge(sets,i,partner,small){ const L=sets[i]||[]; if(!L.length) return `<span class="g1c none" tabindex="0" data-g1l="" data-g1p="" title="">G1 0勝</span>`;
+  return `<span class="g1c${small?' sm':''}" tabindex="0" data-g1l="${L.join(',')}" data-g1p="${partner!=null&&sets[partner]?g1Shared(L,sets[partner]).join(','):''}">G1 <b>${L.length}</b>勝</span>`; }
+function g1TipHTML(el){ const L=(el.dataset.g1l||'').split(',').filter(Boolean).map(Number); const P=new Set((el.dataset.g1p||'').split(',').filter(Boolean).map(Number));
+  if(!L.length) return '<h5>G1 0勝</h5><div class="own">バ場・距離の適性（赤因子で上げた後）がC未満のため、周回で勝てるG1がありません</div>';
+  const by={1:[],2:[],3:[]}; for(const id of L){ const r=G1BY[id]; by[+r[4][0]].push(r); }
+  const row=r=>`<li class="${P.has(r[0])?'sh':''}"><span class="g1i"><img src="${G1_IMG(r[0])}" alt="" loading="lazy" onerror="this.remove()"></span><span><b>${esc(r[1])}</b><small>${TRK[r[5]]||''} ${r[2]===1?'芝':'ダート'}${r[3]}m${r[4].length>1?'（クラシック・シニア）':''}${r[6]?'・牝馬限定':''}</small></span>${P.has(r[0])?'<em>同一G1</em>':''}</li>`;
+  return `<h5>周回で勝つG1 ${L.length}レース</h5><div class="own">育成シナリオで出走できるG1のうち、この枠の適性（赤因子で上げた後）で勝てるものを、同じターンに重ならないよう路線（クラシック/ティアラ）優先で組んだローテーション${P.size?`・<b>同一G1 ${P.size}レース</b>（相性 +${P.size*G1PT}）`:''}</div>
+  <ul class="g1l${L.length>10?' two':''}">${[1,2,3].filter(y=>by[y].length).map(y=>`<li class="yr">${G1_YR[y]}級</li>${by[y].map(row).join('')}`).join('')}</ul>`; }
 function statWeights(cids,st){
   const w=[0,0,0,0,0];
   for(const cid of cids){ const c=courses[cid];
@@ -1750,7 +1805,7 @@ function renderBlueprints(id,cids,st,body){
       <span class="who">${par(1)}<span class="plus">＋</span>${par(2)}</span>
       <span class="go" aria-hidden="true">›</span>
       <span class="gp">祖：${[3,4,5,6].map(i=>esc(D.chars[b.chs[i]])).join('・')}</span>
-      <span class="meta"><span class="st"><small>相性</small><b>${b.compat+g1Bonus(0)}</b></span><span class="st"><small>継承固有</small><b>${b.gsum.toFixed(2)}<i>バ</i></b></span><span class="tg">${pills}</span></span></button>`;}).join('')}</div>`;
+      <span class="meta"><span class="st"><small>相性</small><b>${b.compat+g1B(b,0)}</b></span><span class="st"><small>継承固有</small><b>${b.gsum.toFixed(2)}<i>バ</i></b></span><span class="tg">${pills}</span></span></button>`;}).join('')}</div>`;
   body.querySelector('.bpList').onclick=e=>{const b=e.target.closest('.bpItem'); if(!b) return; openBlueprintPage(+b.dataset.k);};
 }
 
@@ -1787,13 +1842,13 @@ function pageNode(bp,i,full){
   const n=bp.nodes[i], cc=cards[n.card], nm=D.chars[n.ch]||cc.n;
   const role=i===0?'育成ウマ娘':i<=2?`親${i}`:i<=6?`祖（親${i<=4?1:2}側）`:full?ROLE(i):'';
   // スマホ用の一行要約（タップで詳細）
-  const mini=`<div class="mini">${n.red?`<span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span>`:''}${i>=1&&i<=6&&n.green?`<span class="pill p-green">${esc(n.green.name)}</span>`:''}${i>=1&&i<=6&&n.green&&n.green.fa?'<span class="pill p-fa">終盤加速</span>':''}${i===0?`<span class="pill p-pink">相性 ${n.compat+g1Bonus(0)}</span>`:''}</div>`;
+  const mini=`<div class="mini">${n.red?`<span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span>`:''}${i>=1&&i<=6&&n.green?`<span class="pill p-green">${esc(n.green.name)}</span>`:''}${i>=1&&i<=6&&n.green&&n.green.fa?'<span class="pill p-fa">終盤加速</span>':''}${i===0?`<span class="pill p-pink">相性 ${n.compat+g1B(bp,0)}</span>`:''}</div>`;
   const wf=i>0?`<button type="button" class="wfBtn" data-wf="${i}" title="このウマ娘で取っておきたい白因子">白因子</button>`:'';
   const no=i>0?`<button type="button" class="noBtn" data-no="${i}" title="この枠のウマ娘を変更（一覧から選ぶ・未所持にする）">変更</button>`:'';
   const gn=i>=1&&i<=6&&n.genes?Object.entries(n.genes).map(([t,p])=>`<span class="gchip" title="因子周回時、親・祖親の${APTN[t]}赤因子☆${n.geneStars[t]}">遺伝子 ${APTN[t]} ${p>=1?'確定':'40%'}</span>`).join(''):'';
   const HT=n.rent?'<sup class="rent" title="未所持：フレンドからレンタルする前提">♥</sup>':'';
-  if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Input(i,true)}${wf}${mini}</div>`;
-  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Input(i,true)}${wf}${mini}<span class="pc">育成時の相性 <b data-cmp="${i}" data-base="${n.compat}">${n.compat+g1Bonus(i)}</b></span></div>`;
+  if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Badge(bpG1(bp),i,upOf(i),true)}${wf}${mini}</div>`;
+  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Badge(bpG1(bp),i,upOf(i),true)}${wf}${mini}<span class="pc">育成時の相性 <b>${n.compat+g1B(bp,i)}</b></span></div>`;
   return `<div class="pn ${i===0?'me':i<=2?'par':i<=6?'gp':'gp lo'}${full?' full':''}${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}
     <div class="pcols"><div class="pcA">
     <div class="ph">${ava(n.ch,i===0?60:48,n.card)}<span class="role">${role}${n.rent?'<span class="rentTag">レンタル</span>':''}</span><b>${esc(nm)}${HT}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}</div>
@@ -1802,14 +1857,14 @@ function pageNode(bp,i,full){
     ${i>=1&&n.notes.length?`<details class="pnote"${n.notes.some(t=>/必須/.test(t))?' open':''}><summary>ⓘ 選定メモ（${n.notes.length}）</summary>${n.notes.map(t=>esc(t)).join('<br>')}</details>`:''}
     ${aptGrid(n)}
     </div><div class="pcB">
-    <div class="pf">${i===0?`<span class="pill p-pink">相性 <b data-cmp="0" data-base="${n.compat}">${n.compat+g1Bonus(0)}</b></span>`:(curBF&&curBF.alloc[i]?blueChip(curBF.alloc[i]):'')+redChip(n)}</div>
+    <div class="pf">${i===0?`<span class="pill p-pink">相性 <b>${n.compat+g1B(bp,0)}</b></span>`:(curBF&&curBF.alloc[i]?blueChip(curBF.alloc[i]):'')+redChip(n)}</div>
     ${greenChip(n)}
     ${gn?`<div class="pf">${gn}</div>`:''}
     ${i>0&&isR(n.ch)?`<div class="pf"><span class="pill p-white" title="${esc(restrNote(n.ch))}">出走制限あり・特殊ローテで周回</span></div>`:''}
     ${wf?`<div class="pf">${wf}</div>`:''}
     ${i>=1&&i<=6&&curSP&&curSP.alloc[i]&&curSP.alloc[i].length?`<div class="pf">${curSP.alloc[i].map(w=>`<span class="pill p-white skt" tabindex="0" data-wsk="${esc(w.n)}">白 ${esc(w.n)}</span>`).join('')}</div>`:''}
-    ${i>0?g1Input(i):''}
-    ${i>0&&i<15?`<div class="pc">この枠を育成するときの相性 <b data-cmp="${i}" data-base="${n.compat}">${n.compat+g1Bonus(i)}</b></div>`:''}
+    ${i>0?g1Badge(bpG1(bp),i,i<=2?3-i:upOf(i)):''}
+    ${i>0&&i<15?`<div class="pc">この枠を育成するときの相性 <b>${n.compat+g1B(bp,i)}</b></div>`:''}
   </div></div></div>`;
 }
 let curBF=null, curSP=null, curCtx=null;
@@ -1906,17 +1961,17 @@ function bpText(bp){
   const id=state.sel, c=cards[id], co=courses[state.cids[0]], bf=curBF||blueFactors(id,state.cids,state.style), sp=curSP||skillPlan(id,state.cids,state.style);
   const T=[bp.ctx.tG,bp.ctx.tD,bp.ctx.tS];
   const L=[`【ウマ娘 因子設計図】${c.n} ${c.t}`,`コース：${state.mode==='course'?co.name:state.cids.map(x=>courses[x].name).join(' / ')}（${co.cat}）　脚質：${STY[state.style]}　案${state.bpIdx+1}`,
-    `相性合計 ${bp.compat+g1Bonus(0)}（同一G1 +${g1Bonus(0)}${nRestr(bp.chs,[1,2,3,4,5,6])?` / 出走制限の目安 −${RESTR_PEN*nRestr(bp.chs,[1,2,3,4,5,6])}`:''}）　継承固有 ${bp.gsum.toFixed(2)}バ`,
+    `相性合計 ${bp.compat+g1B(bp,0)}（同一G1 +${g1B(bp,0)}${nRestr(bp.chs,[1,2,3,4,5,6])?` / 出走制限の目安 −${RESTR_PEN*nRestr(bp.chs,[1,2,3,4,5,6])}`:''}）　継承固有 ${bp.gsum.toFixed(2)}バ`,
     `本人の適性：${T.map(t=>`${APTN[t]} ${LET[cards[id].a[t]]}→S（${pct(bp.pS[t])}）`).join('・')}`,''];
   for(let i=1;i<31;i++){ const n=bp.nodes[i], cc=cards[n.card]; const parts=[`赤 ${APTN[n.red.t]}☆${n.red.s}${n.hold?'':'（要補強）'}`];
     if(i<=6&&bf) parts.push(`青 ${STATN[bf.alloc[i]]}☆3`);
     if(n.green) parts.push(`緑 ${n.green.name}${n.green.v>0?' '+n.green.v.toFixed(2)+'バ':''}${n.green.evolved?'（進化）':''}`);
     if(n.genes&&Object.keys(n.genes).length) parts.push('遺伝子 '+Object.entries(n.genes).map(([t,p])=>`${APTN[t]}${p>=1?'確定':'40%'}`).join('・'));
     if(i<=6&&sp&&sp.alloc[i]?.length) parts.push('白 '+sp.alloc[i].map(w=>w.n).join('・'));
-    if(state.g1[i]) parts.push(`同一G1 ${state.g1[i]}勝`);
+    { const L=bpG1(bp)[i]||[]; if(L.length) parts.push(`G1 ${L.length}勝`); }
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 16:02`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 16:32`);
   return L.join('\n');
 }
 function saveCurrentBP(){
@@ -2245,8 +2300,8 @@ function drawBlueprintPage(){
     <div class="bppMain">
       ${deckPanelHTML('bp')}
       <div class="bppOver">
-        <section><h4>相性</h4><div class="big"><b data-cmp="0" data-base="${bp.compat}">${bp.compat+g1Bonus(0)}</b></div>
-          <table class="kv"><tr><th>本人×親1</th><td class="num">${p.cp1}</td></tr><tr><th>本人×親2</th><td class="num">${p.cp2}</td></tr><tr><th>親1×親2</th><td class="num">${p.pp}</td></tr><tr><th>本人×親×祖</th><td class="num">${p.tri.join(' + ')}</td></tr><tr><th>同一G1（親＋祖）</th><td class="num" data-g1sum="0">+${g1Bonus(0)}</td></tr>${nRestr(bp.chs,[1,2,3,4,5,6])?`<tr><th title="出走制限のあるウマ娘は特殊ローテで因子周回するため同一G1が稼ぎにくい">出走制限（目安）</th><td class="num">−${RESTR_PEN*nRestr(bp.chs,[1,2,3,4,5,6])}</td></tr>`:''}</table><p class="muted small" style="margin:6px 0 0">各枠の「同一G1」に勝利数を入れると、1勝につき+${G1PT}で相性に加算されます。</p></section>
+        <section><h4>相性</h4><div class="big"><b>${bp.compat+g1B(bp,0)}</b></div>
+          <table class="kv"><tr><th>本人×親1</th><td class="num">${p.cp1}</td></tr><tr><th>本人×親2</th><td class="num">${p.cp2}</td></tr><tr><th>親1×親2</th><td class="num">${p.pp}</td></tr><tr><th>本人×親×祖</th><td class="num">${p.tri.join(' + ')}</td></tr><tr><th>同一G1（親＋祖）</th><td class="num">+${g1B(bp,0)}</td></tr>${nRestr(bp.chs,[1,2,3,4,5,6])?`<tr><th title="出走制限のあるウマ娘は特殊ローテで因子周回するため同一G1が稼ぎにくい">出走制限（目安）</th><td class="num">−${RESTR_PEN*nRestr(bp.chs,[1,2,3,4,5,6])}</td></tr>`:''}</table><p class="muted small" style="margin:6px 0 0">同一G1：各枠が因子周回で勝つG1（育成シナリオで出走でき、赤因子で上げた後の適性で勝てるもの）から、親1×親2・親×祖の組ごとに両方が勝つレース1つにつき+${G1PT}。各枠の「G1 ◯勝」にカーソルを合わせるとレース一覧を表示します。</p></section>
         <section><h4>本人の適性（目標：すべてS）</h4><table class="kv">${tgt}</table><details class="calcNote"><summary>S確率の計算の前提</summary><p class="muted small" style="margin:4px 0 0">育成開始時に☆数でAまで上げ、クラシック4月・シニア4月の継承イベントで赤因子が発動するとSになります。赤因子に加えて、親・祖親に「〇〇の遺伝子」（白因子）が付くよう第2世代の赤因子を配置しています（因子周回時に親・祖親の同じ赤因子☆12以上で確定、☆6以上で40%）。S確率は相性◎で☆3の発動率を親10%・祖7%、遺伝子を6%とし、継承イベント2回・ウマプランで各回2パターンから良い方を選ぶ前提の目安です（適性ごとにそれぞれ狙った場合）。育成ウマ娘は目標レースだけ出走する前提です。</p></details></section>
         <section><h4>路線</h4>${(()=>{const R=routeOf(bp.chs[0]); const ns=bp.nodes.slice(1); const m=ns.filter(n=>routeFit(bp.chs[0],n.ch)===2).length, sc=ns.filter(n=>routeFit(bp.chs[0],n.ch)===1).length, ng=ns.filter(n=>routeFit(bp.chs[0],n.ch)===0).length;
           return `<p class="small" style="margin:0 0 4px">育成ウマ娘：<b class="rt-${R||'x'}">${R?RNAME[R]+'路線':'判定なし'}</b></p><p class="muted small" style="margin:0">同じ路線 ${m}人 / シナリオ次第でクラシック可 ${sc}人 / 同じ路線のG1を走れない ${ng}人（親〜第2世代下の30枠）</p>`;})()}</section>
@@ -2287,8 +2342,8 @@ function drawBlueprintPage(){
   requestAnimationFrame(drawLines);
 }
 function refreshCompat(){
-  document.querySelectorAll('[data-cmp]').forEach(e=>{e.textContent=(+e.dataset.base)+g1Bonus(+e.dataset.cmp);});
-  document.querySelectorAll('[data-g1sum]').forEach(e=>{e.textContent='+'+g1Bonus(+e.dataset.g1sum);});
+  const bp=typeof curBP==='function'?curBP():null;
+  document.querySelectorAll('[data-cmp]').forEach(e=>{e.textContent=(+e.dataset.base)+g1B(bp,+e.dataset.cmp);});
 
 }
 function drawLines(){
@@ -2336,7 +2391,7 @@ function rankReq(cid){ const uf=cards[cid]&&cards[cid].uf; if(!uf) return [];
   for(const [ef,c,pc] of uf){ for(const [alts,lab] of [[pc,'前提'],[c,'発動時']]) for(const a of alts){ const s9=set(a,9), s12=set(a,12); if(!s9) continue;
       const t=`${lab}：チャンミ（9人）${fmt(s9,9)}／LoH（12人）${fmt(s12,12)}`; if(!seen.has(t)){ seen.add(t); out.push(t); } } }
   return out; }
-function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk);
+function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk); if(el.dataset.g1l!=null) return g1TipHTML(el);
   const cid=el.dataset.skc, i=+el.dataset.ski, v=+el.dataset.skv||0, c=cards[cid]; if(!c||!c.u[0]) return '';
   const [nm,desc]=c.u[0]; const cids=state.cids||targetCourses(), st=state.style, isP=i<=2;
   const g=canActivate(cid,cids,st), why=gateWhy(cid), ac=[acS(cid,st),(c.ac||[1,[]])[1]];
@@ -2368,10 +2423,10 @@ function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk);
     tip.style.left=x+'px'; tip.style.top=y+'px'; };
   const show=el=>{ const h=skTipHTML(el); if(!h) return; cur=el; tip.innerHTML=h; tip.hidden=false; place(el); };
   const hide=()=>{ cur=null; tip.hidden=true; };
-  document.addEventListener('mouseover',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk]'); if(el&&el!==cur) show(el); else if(!el&&cur) hide(); });
-  document.addEventListener('focusin',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk]'); if(el) show(el); });
+  document.addEventListener('mouseover',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el&&el!==cur) show(el); else if(!el&&cur) hide(); });
+  document.addEventListener('focusin',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el) show(el); });
   document.addEventListener('focusout',hide);
-  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk]'); if(el){ if(cur===el) hide(); else show(el); } });
+  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el){ if(cur===el) hide(); else show(el); } });
   addEventListener('scroll',()=>{ if(cur) place(cur); },true); addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
 })();
 // ---------- 設計図：タイルをドラッグして別の枠と入れ替え → 赤因子・遺伝子・第2世代を即座に最適化し直す ----------
@@ -2433,8 +2488,9 @@ const MY_ROLE=i=>i===0?'育成ウマ娘':i<=2?`親${i}`:i<=6?'祖':i<=14?'第2�
 // 赤因子による適性上昇：その枠の親・祖の同系統☆合計（1-3→+1 / 4-6→+2 / 7-9→+3 / 10以上→+4、上限A）
 function myStars(i){ const s=Array(10).fill(0); for(const j of ANC_T[i]||[]){ const r=my.n[j]&&my.n[j].r; if(r&&my.n[j].c) s[r.t]+=r.s; } return s; }
 function myNode(i){ const x=my.n[i]; if(!x.c) return null; const base=cards[x.c].a, st=myStars(i); return {base,post:base.map((b,t)=>postApt(b,st[t])),red:x.r,stars:st}; }
-const myG1=i=>[...parentsOf(i),...gpsOf(i)].filter(j=>j<=6).reduce((a,j)=>a+(my.n[j].c?(my.n[j].g||0)*G1PT:0),0);
-function myCompat(i){ return nodeCompat(myChs(),i)+(i===0?myG1(0):0); }
+const mySets=()=>my.n.map((x,i)=>{ const n=myNode(i); return n?g1Wins(myCh(i),n.post):[]; });
+const myG1=i=>g1BonusOf(mySets(),i);
+function myCompat(i){ return nodeCompat(myChs(),i)+myG1(i); }
 function myCompatParts(){ const c=myChs(), P=[1,2]; const pr=(a,b)=>c[a]&&c[b]&&c[a]!==c[b]?pair(c[a],c[b]):0;
   return {cp1:pr(0,1),cp2:pr(0,2),pp:pr(1,2),tri:[[1,3],[1,4],[2,5],[2,6]].map(([p,g])=>c[0]&&c[p]&&c[g]?triple(c[0],c[p],c[g]):0)}; }
 function myTile(i){ const x=my.n[i], n=myNode(i), ch=myCh(i), cc=x.c?cards[x.c]:null, sz=i===0?'full':i<=6?'full':i<=14?'s':'xs';
@@ -2444,11 +2500,11 @@ function myTile(i){ const x=my.n[i], n=myNode(i), ch=myCh(i), cc=x.c?cards[x.c]:
   const memo=`<button type="button" class="mMemoB${x.m?' on':''}" data-mmemo="${i}" title="${x.m?esc(x.m):'メモを書く'}">✎</button>`;
   if(sz==='xs') return `<div class="mt xs${ch?'':' empty'}" data-mi="${i}">${av}${red}${x.m?`<span class="mDot" title="${esc(x.m)}">✎</span>`:''}</div>`;
   const nm=ch?`<div class="mNm"><b>${esc(D.chars[ch])}</b><small>${esc(cc.t)}</small></div>`:`<div class="mNm muted"><b>${MY_ROLE(i)}</b><small>未設定</small></div>`;
-  if(sz==='s') return `<div class="mt s${ch?'':' empty'}" data-mi="${i}">${memo}${av}${nm}${n?`<div class="mF4">${FOUR.map(t=>`<span class="${n.post[t]>n.base[t]?'up':''}"><i>${APTS[t]}</i><b class="L${n.post[t]}">${LET[n.post[t]]}</b></span>`).join('')}</div>`:''}${red}${x.m?`<p class="mMemo">${esc(x.m)}</p>`:''}</div>`;
+  if(sz==='s') return `<div class="mt s${ch?'':' empty'}" data-mi="${i}">${memo}${av}${nm}${n?`<div class="mF4">${FOUR.map(t=>`<span class="${n.post[t]>n.base[t]?'up':''}"><i>${APTS[t]}</i><b class="L${n.post[t]}">${LET[n.post[t]]}</b></span>`).join('')}</div>`:''}${red}${ch?g1Badge(mySets(),i,upOf(i),true):''}${x.m?`<p class="mMemo">${esc(x.m)}</p>`:''}</div>`;
   const grid=n?aptGrid({base:n.base,post:n.post,red:x.r},false):'';
   const uq=i>=1&&i<=6&&cc&&cc.u&&cc.u[0]?`<span class="pill p-green skt" tabindex="0" data-skc="${x.c}" data-ski="${i}" data-skv="0">緑 ${esc(cc.u[0][0])}</span>`:'';
   const cmp=ch&&(i===0||parentsOf(i).some(j=>my.n[j].c))?`<span class="mCmp" title="${i===0?'育成時の相性（親・祖の同一G1込み）':'この枠を育成するときの相性'}">♥ <b>${myCompat(i)}</b></span>`:'';
-  const g1=i>=1&&i<=6&&ch?`<label class="g1in sm" title="この枠のウマ娘の同一G1勝利数（1勝につき相性+${G1PT}）">G1 <input type="number" min="0" max="99" inputmode="numeric" data-mg1="${i}" value="${x.g||0}"></label>`:'';
+  const g1=i>=1&&ch?g1Badge(mySets(),i,i<=2?3-i:upOf(i),true):'';
   return `<div class="mt full${ch?'':' empty'}${i===0?' child':''}" data-mi="${i}"><div class="mHd">${av}${nm}${memo}</div>${grid}<div class="mRow">${red}${uq}</div><div class="mRow">${cmp}${g1}</div>${x.m?`<p class="mMemo">${esc(x.m)}</p>`:''}</div>`;
 }
 function drawMy(){ const pg=$('#myPage'); if(!pg||pg.hidden) return; const y=window.scrollY;
