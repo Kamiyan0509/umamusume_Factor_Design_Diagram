@@ -555,6 +555,24 @@ details.calcNote{margin-top:6px}details.calcNote summary{cursor:pointer;font-siz
 #skTip .g1l li.sh{background:var(--gold-soft)}#skTip .g1l li.yr{display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-top:4px;padding:0}
 #skTip .g1l b{display:block;font-size:12px;line-height:1.25}#skTip .g1l small{display:block;font-size:10.5px;color:var(--muted)}#skTip .g1l em{font-style:normal;font-size:10px;font-weight:700;color:#8a5a00}
 #skTip .g1i{display:block;width:64px;height:32px;border-radius:4px;background:linear-gradient(135deg,#2e7453,#1e4f39);overflow:hidden}#skTip .g1i img{width:100%;height:100%;object-fit:cover;display:block}
+.nfb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:2px}.nfb.own{background:var(--ground);border:1px dashed var(--line);border-radius:8px;padding:4px 6px}
+.nfT{font-size:10.5px;font-weight:700;color:var(--muted)}
+.nfUp{font:inherit;font-size:11.5px;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:2px 10px;cursor:pointer}.nfUp:hover{border-color:var(--pink);color:var(--pink)}.nfUp.sm{font-size:10px;padding:0 6px}
+.myBtn.imp{background:var(--blue,#3a6fb0)}
+#wfModal .box.nfBox{max-width:760px}
+#wfModal .nfDrop{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:2px dashed var(--line);border-radius:10px;padding:10px 12px;margin:4px 0 10px}
+#wfModal .nfFile{font-weight:700;background:var(--pink);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer}
+#wfModal .nfSec{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}#wfModal .nfSec.off{opacity:.5}
+#wfModal .nfSec h4{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 6px;font-size:13px}
+#wfModal .nfRow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:6px}
+#wfModal .nfRow select,#wfModal .nfSec h4 select,#wfModal .wch select,#wfModal .impGrid select{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 4px;background:var(--panel);color:var(--ink);max-width:100%}
+#wfModal .nfW{display:flex;flex-wrap:wrap;gap:4px}#wfModal .wch{display:inline-flex;align-items:center;gap:3px;background:var(--white-soft,#eef0f2);border:1px solid var(--line);border-radius:999px;padding:1px 4px 1px 9px;font-size:12px}
+#wfModal .wch.warn{border-color:#e0a13a;background:#fff5e0}#wfModal .wch button{font:inherit;border:0;background:none;cursor:pointer;color:var(--muted);padding:0 3px}
+#wfModal .wadd input{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;min-width:220px;background:var(--ground);color:var(--ink)}
+#wfModal .impGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}#wfModal .impGrid label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted)}
+#wfModal .impGrid .c{grid-column:1/-1;max-width:260px;justify-self:center;width:100%}#wfModal .impGrid .p{grid-column:span 2}
+#wfModal .nfRow select,#wfModal .wch select{width:auto!important;min-width:0}
+@media (max-width:760px){#wfModal .impGrid{grid-template-columns:1fr 1fr}#wfModal .wadd input{min-width:0;width:100%}}
 /* ---------- 自作設計図 ---------- */
 body.my-open .wrap > :not(#myPage){display:none}
 #myPage[hidden]{display:none!important}
@@ -636,7 +654,7 @@ body.my-open .wrap > :not(#myPage){display:none}
 <div class="wrap">
 <header class="top">
   <h1>ウマ娘 <span>因子設計</span>ボード</h1>
-  <div class="hdR"><button type="button" class="myBtn" data-mopen title="自分でウマ娘・赤因子を並べてシンプルな因子設計図を作る">✎ 自作設計図</button><p id="dataInfo"></p><button type="button" id="updBtn" class="updBtn" title="U-toolsから新しいウマ娘・サポカ・スキルのデータを取得してDBを更新">⟳ 情報更新</button></div>
+  <div class="hdR"><button type="button" class="myBtn imp" data-impopen title="ほかのツールで作った設計図の画像から、育成ウマ娘・親・祖を取り込む">🖼 画像から取り込む</button><button type="button" class="myBtn" data-mopen title="自分でウマ娘・赤因子を並べてシンプルな因子設計図を作る">✎ 自作設計図</button><p id="dataInfo"></p><button type="button" id="updBtn" class="updBtn" title="U-toolsから新しいウマ娘・サポカ・スキルのデータを取得してDBを更新">⟳ 情報更新</button></div>
 </header>
 
 <section class="topbar" aria-label="コース条件">
@@ -912,6 +930,8 @@ function aptsFor(id,cid,st){const a=cards[id].a,c=courses[cid]; return {g:a[c.gr
 try{ ['umaFactorBoard','umaG1','umaSkOff','umaDeck','umaSupF','umaRestr'].forEach(k=>localStorage.removeItem(k)); }catch(e){}
 const state={mode:'course',course:'10606',style:3,sel:null,sub:'cand',boost:true,bpIdx:0,ovr:{},rankTab:0};
 try{ state.unowned=new Set(JSON.parse(localStorage.getItem('umaUnowned')||'[]')); }catch(e){ state.unowned=new Set(); }
+try{ state.nf=JSON.parse(localStorage.getItem('umaNF')||'{}')||{}; }catch(e){ state.nf={}; }
+const saveNF=()=>{ try{ localStorage.setItem('umaNF',JSON.stringify(state.nf)); }catch(e){} };
 const saveUnowned=()=>{ try{ LOWBEST.clear(); }catch(e){} try{ localStorage.setItem('umaUnowned',JSON.stringify([...state.unowned])); }catch(e){} };
 // 育成中にレース出走制限があるウマ娘（特殊ローテの育成シナリオで因子周回する必要があり、同一G1勝利が稼ぎにくい）
 // 初期値：ヴィクトワールピサ（シニア級3月後半に大阪杯・高松宮記念など6レースへ出走できない）。設計図の「出走制限」から追加・解除できる
@@ -941,7 +961,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 16:32`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 21:39`;
 
 
 // ---- キャラアイコン ----
@@ -1421,7 +1441,7 @@ function blueFactors(id,cids,st){
   const alloc={1:main.t,2:main.t,3:main.t,5:main.t,4:gpSplit?sub.t:main.t,6:gpSplit?sub.t:main.t};
   return {ranked,main,sub,alloc,assumed,counts,rec:assumed?recommendDeck(cids):null};
 }
-const blueChip=t=>`<span class="pill p-blue">青 ${STATN[t]}☆3</span>`;
+const blueChip=(t,s)=>`<span class="pill p-blue"${s?' title="読み込んだ因子（育成済み）"':''}>青 ${STATN[t]}☆${s||3}${s?'（所持）':''}</span>`;
 function blueSummary(bf,compact){
   const max=Math.max(...bf.ranked.map(r=>r.score));
   const deckTxt=bf.assumed?`サポカ未指定のため、おすすめ編成（${bf.rec.map((n,i)=>n?STATN[i].slice(0,2)+n:'').filter(Boolean).join('・')}）を想定`:`編成: ${SUPT.map((n,i)=>bf.counts[i]?n+bf.counts[i]:'').filter(Boolean).join('・')}`;
@@ -1567,9 +1587,19 @@ function assignTopReds(slots6,cardOf,prefTypes){
     red[n]={t:bt,s:3,alt:{from:t,a:aOf(n,t),off:true}}; }
   return red;
 }
+// 画像から読み込んだ（育成済みの）ウマ娘の赤因子は固定し、残りの枠でオールSに足りない赤因子を埋める
+function assignRedsFixed(slots6,cardOf,PREF,fixed){
+  const rem=[...slots6]; for(const n in fixed){ const k=rem.indexOf(fixed[n].t); if(k>=0) rem.splice(k,1); }
+  const free=[1,2,3,4,5,6].filter(n=>!fixed[n]); while(rem.length<free.length) rem.push(PREF[0]); rem.length=free.length;
+  const aOf=(n,t)=>cards[cardOf(n)].a[t]; const sv=(n,t)=>{ const a=aOf(n,t); return a>=7?10:a>=RED_MIN?6:0; };
+  let best=null,bv=-1; const perm=(a,rest)=>{ if(!rest.length){ let v=0; a.forEach((n,k)=>v+=sv(n,rem[k])); if(v>bv){bv=v;best=a;} return; } rest.forEach((x,k)=>perm([...a,x],rest.filter((_,j)=>j!==k))); }; perm([],free);
+  const red={}; for(const n in fixed) red[n]={t:fixed[n].t,s:fixed[n].s,own:1};
+  (best||[]).forEach((n,k)=>{ const t=rem[k]; if(aOf(n,t)>=RED_MIN){ red[n]={t,s:3}; return; } const alt=PREF.find(u=>aOf(n,u)>=RED_MIN); red[n]=alt!=null?{t:alt,s:3,alt:{from:t,a:aOf(n,t)}}:{t,s:3}; });
+  return red; }
+const nfOf=(baseKey,k)=>((state.nf||{})[baseKey]||{})[k]||{};
 function planBlueprints(id,cids,st){
   const baseKey=id+'|'+cids.join(',')+'|'+st; const OV=state.ovr[baseKey]||{};
-  const key=baseKey+'|'+state.boost+'|'+[...state.unowned].sort().join(',')+'|'+[...state.restr].sort().join(',')+'|'+JSON.stringify(OV); if(bpCache.has(key)) return bpCache.get(key);
+  const key=baseKey+'|'+state.boost+'|'+[...state.unowned].sort().join(',')+'|'+[...state.restr].sort().join(',')+'|'+JSON.stringify(OV)+'|'+JSON.stringify((state.nf||{})[baseKey]||{}); if(bpCache.has(key)) return bpCache.get(key);
   const child=cards[id], c=child.ch, co=courses[cids[0]];
   const tG=co.ground==='芝'?0:1, tD=CATIDX[co.cat], tS=5+st;
   const cands=candidates(id,cids,st); const byCh={}; cands.forEach(x=>byCh[x.ch]=x);
@@ -1652,7 +1682,10 @@ function planBlueprints(id,cids,st){
       const sel={...r0.sel}; for(const i of top) sel[i]={card:ov[i],inh:i<=2?(byCh[chs[i]]?.vals?.[ov[i]]||0):(SPECIAL_INH[ov[i]]?0:(byCh[chs[i]]?.vals?.[ov[i]]||0)),r:!owned(ov[i])};
       const red=[...r0.red]; Object.assign(red,assignTopReds(slots6,n=>sel[n].card,PREF));
       r={...r0,chs,sel,red,compat:nodeCompat(chs,0),gsum}; }
-    return fillLower(r,child,{id,cids,st,tG,tD,tS,byCh,REQ,force:ov,faNeed,childFA}); });
+    const NF=nfOf(baseKey,k), FR={}; for(const n in NF) if(NF[n]&&NF[n].r) FR[n]={t:NF[n].r.t,s:NF[n].r.s};
+    const FR6={}; for(const n in FR) if(+n<=6) FR6[n]=FR[n];
+    if(Object.keys(FR6).length){ const red=[...r.red]; Object.assign(red,assignRedsFixed(slots6,n=>r.sel[n].card,PREF,FR6)); r={...r,red}; }
+    return fillLower(r,child,{id,cids,st,tG,tD,tS,byCh,REQ,force:ov,faNeed,childFA,fixed:FR}); });
   bpCache.set(key,res); return res;
 }
 function fillLower(r,child,ctx){
@@ -1662,26 +1695,28 @@ function fillLower(r,child,ctx){
   // 親・祖親に「〇〇の遺伝子」（白因子）を付けるための赤因子配置：
   // 因子周回でその枠を育成するとき、親・祖親の同じ赤因子が合計☆12以上で確定、☆6〜11で40%。遺伝子は育成ウマ娘の継承イベントで赤因子と同じく発動し適性を1段階上げる
   // 親1系（7〜10）・親2系（11〜14）の赤因子の種類と、祖親ごとの第2世代下（4人）の種類を総当たりし、育成ウマ娘のS確率が最大になる組み合わせを選ぶ
+  const FX=ctx.fixed||{}; const isFx=n=>!!FX[n]||!!FX[upOf(n)]||(upOf(n)>0&&!!FX[upOf(upOf(n))]); // 育成済み（画像で読み込んだ）枠とその親・祖は変えない
   const {tG,tD,tS}=ctx; let K=[tD,tS,tG].filter(t=>child.a[t]<8); if(!K.length) K=[tD];
   const lackOK=()=>[1,2,3,4,5,6].every(i=>STAR_NEED[Math.max(0,7-baseOf(i,red[i].t))]<=starsFor(i,red[i].t));
   let bestV=-Infinity, bestSet=null;
   const combos=[]; const rec=(a)=>{ if(a.length===6){combos.push(a); return;} for(const t of K) rec([...a,t]); }; rec([]);
   for(const cb of combos){ const [T1,T2,U3,U4,U5,U6]=cb, T={1:T1,2:T2}, U={3:U3,4:U4,5:U5,6:U6};
     for(let m=7;m<15;m++){ red[m]={t:T[upOf(upOf(m))],s:3}; for(const b of parentsOf(m)) red[b]={t:U[upOf(m)],s:3}; }
+    for(const n in FX) red[n]={...FX[n],own:1};
     const genes=genesOf(red,starsFor);
     let v=[tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,genes),0);
     if(!lackOK()) v-=5;
     if(v>bestV){bestV=v; bestSet=cb;} }
   { const [T1,T2,U3,U4,U5,U6]=bestSet, T={1:T1,2:T2}, U={3:U3,4:U4,5:U5,6:U6};
-    for(let m=7;m<15;m++){ red[m]={t:T[upOf(upOf(m))],s:3}; for(const b of parentsOf(m)) red[b]={t:U[upOf(m)],s:3}; } }
+    for(let m=7;m<15;m++){ red[m]={t:T[upOf(upOf(m))],s:3}; for(const b of parentsOf(m)) red[b]={t:U[upOf(m)],s:3}; } for(const n in FX) red[n]={...FX[n],own:1}; }
   // 親・祖親の赤因子は必ず☆3で取る前提：その枠の適性が育成開始時に確実にAになるよう、第2世代に同じ赤因子を置く（遺伝子の確率には頼らない）
   const holdSlot={}, holdFix={};
   { const cardOf=i=>(ctx.force&&ctx.force[i])||(r.sel&&r.sel[i]&&r.sel[i].card)||null;
     const totalS=()=>{ const g=genesOf(red,starsFor); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0); };
-    for(const i of [1,2,3,4,5,6]){ const c=cardOf(i); if(!c) continue; const t=red[i].t, b=cards[c].a[t]; if(b>=7) continue;
+    for(const i of [1,2,3,4,5,6]){ const c=cardOf(i); if(!c||FX[i]) continue; const t=red[i].t, b=cards[c].a[t]; if(b>=7) continue;
       const need=STAR_NEED[Math.min(4,7-b)]; let guard=0;
       while(starsFor(i,t)<need&&guard++<6){
-        const slots=[...parentsOf(i),...gpsOf(i)].filter(n=>n>=7&&red[n]&&red[n].t!==t&&!holdSlot[n]);
+        const slots=[...parentsOf(i),...gpsOf(i)].filter(n=>n>=7&&red[n]&&red[n].t!==t&&!holdSlot[n]&&!isFx(n));
         if(!slots.length) break;
         let best=null,bv=-Infinity; for(const n of slots){ const keep=red[n]; red[n]={t,s:3}; const v=totalS(); red[n]=keep; if(v>bv){bv=v;best=n;} }
         red[best]={t,s:3}; holdSlot[best]=i; }
@@ -1696,11 +1731,11 @@ function fillLower(r,child,ctx){
     const dNeed=i=>chs[i]===STAY_GOLD?2:3;
     const totalS=()=>{ const g=genesOf(red,starsFor); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0)-(lackOK()?0:5); };
     for(const i of [1,2,3,4,5,6]){
-      const b=dBase(i), want=dNeed(i); if(b>=want) continue;
+      const b=dBase(i), want=dNeed(i); if(b>=want||FX[i]) continue;
       const needStars=STAR_NEED[Math.min(4,want-b)];
       let guard=0;
       while(starsFor(i,1)<needStars&&guard++<4){
-        const slots=[...parentsOf(i),...gpsOf(i)].filter(n=>n>=7&&red[n]&&red[n].t!==1&&!holdSlot[n]);
+        const slots=[...parentsOf(i),...gpsOf(i)].filter(n=>n>=7&&red[n]&&red[n].t!==1&&!holdSlot[n]&&!isFx(n));
         if(!slots.length) break;
         let best=null,bv=-Infinity;
         for(const n of slots){ const keep=red[n]; red[n]={t:1,s:3}; const v=totalS(); red[n]=keep; if(v>bv){bv=v;best=n;} }
@@ -1754,7 +1789,7 @@ function fillLower(r,child,ctx){
     if(i>0&&!(ctx.force&&ctx.force[i])&&cards[card].a[red[i].t]<7){const alt=i<=2?bestCardFor(ch,red[i].t):bestLowerCardFor(ch,red[i].t); if(cards[alt].a[red[i].t]>=7&&i>6) card=alt;}
     const base=cards[card].a;
     const post=base.map((b,t)=>postApt(b,starsFor(i,t)));
-    const hold=i===0?true:post[red[i].t]>=7;
+    const hold=i===0?true:(FX[i]?true:post[red[i].t]>=7);
     const x=byCh[ch]; let green=null;
     if(i>=1&&i<=6&&x){ const isP=i<=2; const v=isP?x.inh:x.gpInh; const sp=SPECIAL_INH[card];
       green={gate:canActivate(card,ctx.cids,ctx.st), why:gateWhy(card), name:cards[card].u[0][0], v:isP?(card===x.card?v:(x.vals?.[card]||0)):(card===x.gpCard?v:(x.vals?.[card]||0)), ac:[acS(card,ctx.st),(cards[card].ac||[1,[]])[1]], special:!!sp, evolved:!!sp&&isP, fa:faAll(card,ctx.cids,ctx.st)}; }
@@ -1824,7 +1859,7 @@ function closeBlueprintPage(fromPop){
 window.addEventListener('popstate',()=>{ if(location.hash!=='#blueprint'&&!$('#bpPage').hidden) closeBlueprintPage(true); });
 window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#bpPage').hidden) closeBlueprintPage(); });
 
-function redChip(n){ if(!n.red) return ''; return `<span class="pill p-red${n.hold?'':' warn'}" title="${n.geneHold?'親の遺伝子が発動すれば適性がAになり取得できる':n.hold?(n.i<=6?'☆3で取る前提（育成開始時に適性A）':'この枠で取得できる'):'この枠の適性がAに届かず☆3で取れない'}">赤 ${APTN[n.red.t]}☆${n.red.s}${n.hold?'':' ⚠'}</span>${n.geneHold?'<span class="gchip" title="親が持つ遺伝子（白因子）が発動すれば適性がAになり、この赤因子を指定できる（${UMAPLAN_NOTE}）">遺伝子でA→赤因子可 ${pct(n.geneP||0)}</span>':''}`; }
+function redChip(n){ if(!n.red) return ''; if(n.red.own) return `<span class="pill p-red" title="読み込んだ因子（育成済み）">赤 ${APTN[n.red.t]}☆${n.red.s}（所持）</span>`; return `<span class="pill p-red${n.hold?'':' warn'}" title="${n.geneHold?'親の遺伝子が発動すれば適性がAになり取得できる':n.hold?(n.i<=6?'☆3で取る前提（育成開始時に適性A）':'この枠で取得できる'):'この枠の適性がAに届かず☆3で取れない'}">赤 ${APTN[n.red.t]}☆${n.red.s}${n.hold?'':' ⚠'}</span>${n.geneHold?'<span class="gchip" title="親が持つ遺伝子（白因子）が発動すれば適性がAになり、この赤因子を指定できる（${UMAPLAN_NOTE}）">遺伝子でA→赤因子可 ${pct(n.geneP||0)}</span>':''}`; }
 const skA=(cid,i,v)=>` class="skt" tabindex="0" data-skc="${cid}" data-ski="${i}" data-skv="${v||0}"`;
 function faBadge(b,short){ if(!b.faKnown) return short?'':'<span class="pill p-white" title="このコースは構成データが無いため判定できません">終盤加速：判定不可</span>';
   if(b.childFA){ const nm=cards[b.nodes[0].card].u[0]?.[0]; return `<span class="pill p-fa" title="育成ウマ娘本人の固有が終盤突入時に最速で発動する加速スキル">終盤加速 本人${short?'':'：'+esc(nm)}</span>`; }
@@ -1848,7 +1883,7 @@ function pageNode(bp,i,full){
   const gn=i>=1&&i<=6&&n.genes?Object.entries(n.genes).map(([t,p])=>`<span class="gchip" title="因子周回時、親・祖親の${APTN[t]}赤因子☆${n.geneStars[t]}">遺伝子 ${APTN[t]} ${p>=1?'確定':'40%'}</span>`).join(''):'';
   const HT=n.rent?'<sup class="rent" title="未所持：フレンドからレンタルする前提">♥</sup>':'';
   if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Badge(bpG1(bp),i,upOf(i),true)}${wf}${mini}</div>`;
-  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Badge(bpG1(bp),i,upOf(i),true)}${wf}${mini}<span class="pc">育成時の相性 <b>${n.compat+g1B(bp,i)}</b></span></div>`;
+  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Badge(bpG1(bp),i,upOf(i),true)}${wf}${nfBlock(bp,i,true)}${mini}<span class="pc">育成時の相性 <b>${n.compat+g1B(bp,i)}</b></span></div>`;
   return `<div class="pn ${i===0?'me':i<=2?'par':i<=6?'gp':'gp lo'}${full?' full':''}${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}
     <div class="pcols"><div class="pcA">
     <div class="ph">${ava(n.ch,i===0?60:48,n.card)}<span class="role">${role}${n.rent?'<span class="rentTag">レンタル</span>':''}</span><b>${esc(nm)}${HT}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}</div>
@@ -1857,13 +1892,14 @@ function pageNode(bp,i,full){
     ${i>=1&&n.notes.length?`<details class="pnote"${n.notes.some(t=>/必須/.test(t))?' open':''}><summary>ⓘ 選定メモ（${n.notes.length}）</summary>${n.notes.map(t=>esc(t)).join('<br>')}</details>`:''}
     ${aptGrid(n)}
     </div><div class="pcB">
-    <div class="pf">${i===0?`<span class="pill p-pink">相性 <b>${n.compat+g1B(bp,0)}</b></span>`:(curBF&&curBF.alloc[i]?blueChip(curBF.alloc[i]):'')+redChip(n)}</div>
+    <div class="pf">${i===0?`<span class="pill p-pink">相性 <b>${n.compat+g1B(bp,0)}</b></span>`:(curBF&&curBF.alloc[i]!=null&&i<=6?blueChip(curBF.alloc[i],curBF.own&&curBF.own[i]):'')+redChip(n)}</div>
     ${greenChip(n)}
     ${gn?`<div class="pf">${gn}</div>`:''}
     ${i>0&&isR(n.ch)?`<div class="pf"><span class="pill p-white" title="${esc(restrNote(n.ch))}">出走制限あり・特殊ローテで周回</span></div>`:''}
     ${wf?`<div class="pf">${wf}</div>`:''}
-    ${i>=1&&i<=6&&curSP&&curSP.alloc[i]&&curSP.alloc[i].length?`<div class="pf">${curSP.alloc[i].map(w=>`<span class="pill p-white skt" tabindex="0" data-wsk="${esc(w.n)}">白 ${esc(w.n)}</span>`).join('')}</div>`:''}
+    ${i>=1&&i<=6&&curSP&&curSP.own&&curSP.own[i]?`<div class="pf">${curSP.own[i].slice(0,10).map(([w,st])=>`<span class="pill p-white">白 ${esc(w)}☆${st}</span>`).join('')}${curSP.own[i].length>10?`<span class="muted small">ほか${curSP.own[i].length-10}個</span>`:''}</div>`:i>=1&&i<=6&&curSP&&curSP.alloc[i]&&curSP.alloc[i].length?`<div class="pf">${curSP.alloc[i].map(w=>`<span class="pill p-white skt" tabindex="0" data-wsk="${esc(w.n)}">白 ${esc(w.n)}</span>`).join('')}</div>`:''}
     ${i>0?g1Badge(bpG1(bp),i,i<=2?3-i:upOf(i)):''}
+    ${i>=1&&i<=14?nfBlock(bp,i):''}
     ${i>0&&i<15?`<div class="pc">この枠を育成するときの相性 <b>${n.compat+g1B(bp,i)}</b></div>`:''}
   </div></div></div>`;
 }
@@ -1950,7 +1986,7 @@ function openRestr(){
     <p class="muted small" style="margin:8px 0 0">初期設定：ヴィクトワールピサ（シニア級3月後半に大阪杯・高松宮記念など6レースへ出走できない）。</p></div>`;
   wfEl.hidden=false; }
 // ---------- 設計図の保存 ----------
-const SV_KEY='umaSavedBP';
+const SV_KEY='umaSavedBP', SV_MAX=100;
 function savedList(){ try{ const v=JSON.parse(localStorage.getItem(SV_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 function setSaved(L){ try{ localStorage.setItem(SV_KEY,JSON.stringify(L)); return true; }catch(e){ return false; } }
 const svToastEl=document.createElement('div'); svToastEl.id='svToast'; svToastEl.hidden=true; svToastEl.setAttribute('role','status'); document.body.appendChild(svToastEl);
@@ -1971,7 +2007,7 @@ function bpText(bp){
     { const L=bpG1(bp)[i]||[]; if(L.length) parts.push(`G1 ${L.length}勝`); }
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 16:32`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 21:39`);
   return L.join('\n');
 }
 function saveCurrentBP(){
@@ -1979,8 +2015,10 @@ function saveCurrentBP(){
   const item={v:1,t:Date.now(),name:`${cards[id].n}（${state.mode==='course'?courses[state.cids[0]].name:courses[state.cids[0]].cat}・${STY[state.style]}）案${state.bpIdx+1}`,
     id,mode:state.mode,course:state.course,cond:{g:$('#cGround').value,c:$('#cCat').value,d:$('#cDist').value,t:$('#cTurn').value},cids:state.cids,style:state.style,k:state.bpIdx,
     ovr:(state.ovr[k]||{})[state.bpIdx]||null,g1:state.g1.slice(),chs:bp.chs.slice(),cards:bp.nodes.map(n=>n.card),compat:bp.compat,gsum:+bp.gsum.toFixed(2),text:bpText(bp)};
-  const L=savedList(); L.unshift(item); if(L.length>100) L.length=100;
-  const ok=setSaved(L); updSvCount(); const b=$('#bpPage .svOpen'); if(b&&ok) b.textContent=`保存済み ${L.length}件`;
+  const L=savedList(); if(L.length>=SV_MAX){ toast(`保存は${SV_MAX}件までです。「保存済み」の一覧で不要な設計図を削除してください`,5000); openSavedList(); return; }
+  item.nf=JSON.parse(JSON.stringify(nfCur())); L.unshift(item);
+  const ok=setSaved(L); updSvCount(); const b=$('#bpPage .svOpen'); if(b&&ok) b.textContent=`保存済み ${L.length}/${SV_MAX}`;
+  toast(ok?`アプリ内に保存しました（${L.length}/${SV_MAX}件）。画像が必要なときは「保存済み」の一覧から「画像（PNG）で保存」を押してください`:'保存できませんでした（ブラウザの保存容量がいっぱいです）',4500); return;
   // 設計図データをファイルでダウンロード（読める文章＋読み込み用データ）
   const d=new Date(item.t), ts=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
   toast('画像を作成しています…');
@@ -2054,7 +2092,7 @@ function restoreSaved(x){
   state.style=x.style; state.sel=x.id; state.pin=true; state.sub='bp';
   if(Array.isArray(x.g1)){ state.g1=Array.from({length:31},(_,i)=>+x.g1[i]||0); saveG1(); }
   refresh();
-  const k=bpBaseKey(); if(x.ovr){ state.ovr[k]=state.ovr[k]||{}; state.ovr[k][x.k]=x.ovr; }
+  const k=bpBaseKey(); if(x.ovr){ state.ovr[k]=state.ovr[k]||{}; state.ovr[k][x.k]=x.ovr; } if(x.nf){ state.nf[k]=state.nf[k]||{}; state.nf[k][x.k]=x.nf; saveNF(); }
   wfEl.hidden=true; openBlueprintPage(x.k);
   const bp=curBP(); const same=bp&&x.chs.every((c,i)=>c===bp.chs[i]);
   if(!same) setTimeout(()=>toast('データ更新や未所持設定で内容が変わっています。保存時の内容は「テキスト」で確認できます'),50);
@@ -2274,7 +2312,7 @@ function mtreeHTML(bp){
   return `<div class="mlab">${lab}</div><div class="mbox" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${nodes}</div><div class="mleg"><span><i class="r fa"></i>終盤加速の継承固有</span><span><i class="r p1"></i>親1の系統</span><span><i class="r p2"></i>親2の系統</span><span><b style="color:var(--heart)">♥</b>レンタル</span></div>`;
 }
 function drawBlueprintPage(){
-  const id=state.sel, cids=state.cids, st=state.style; curBF=blueFactors(id,cids,st); curSP=skillPlan(id,cids,st); curCtx={cids,st}; const bps=planBlueprints(id,cids,st); const bp=bps[state.bpIdx]; if(!bp) return;
+  const id=state.sel, cids=state.cids, st=state.style; curBF=blueFactors(id,cids,st); curSP=skillPlan(id,cids,st); curCtx={cids,st}; const bps=planBlueprints(id,cids,st); const bp=bps[state.bpIdx]; if(!bp) return; { const NFc=nfCur(); curBF=adjBlue(curBF,NFc); curSP=adjSP(curSP,NFc); }
   const co=courses[cids[0]], child=cards[id], {tG,tD,tS}=bp.ctx;
   const tgt=[tG,tD,tS].map(t=>{const b=child.a[t], p3=postApt(b,bp.childStars[t]), p2=postApt(b,bp.childStars2[t]), g=geneOf(bp.childStars[t]);
     const ps=bp.pS[t], nF=[1,2,3,4,5,6].filter(n=>bp.red[n].t===t).length, nG=[1,2,3,4,5,6].filter(n=>bp.genes[n]?.[t]).length;
@@ -2287,8 +2325,8 @@ function drawBlueprintPage(){
     <div class="bppTop">
       <button type="button" class="back" id="bpBack">← ランキングに戻る</button>
       <div class="ttl"><span>設計図</span><b>${esc(child.n)}</b><small>${esc(child.t)} ・ ${esc(co.name)} ・ ${STY[st]}</small></div>
-      <button type="button" class="svSave" id="svSaveBtn" title="この設計図ページを画像（PNG）でダウンロード（ブラウザの保存一覧にも残ります）">★ 保存（PNG）</button>
-      <button type="button" class="svOpen noMgr2" title="保存した設計図の一覧">保存済み ${savedList().length}件</button>
+      <button type="button" class="svSave" id="svSaveBtn" title="この設計図をアプリ内に保存（100件まで）">★ 保存</button>
+      <button type="button" class="svOpen noMgr2" title="保存した設計図の一覧">保存済み ${savedList().length}/${SV_MAX}</button>
       <button type="button" class="noMgr" title="未所持に登録した衣装の一覧">未所持 ${state.unowned.size}件</button>
       <button type="button" class="noMgr2" data-mfrombp title="この設計図を自作設計図ページに写して、自由に編集する">✎ 自作で編集</button>
       <button type="button" class="rsMgr noMgr2" title="育成中にレース出走制限があるウマ娘の一覧">出走制限 ${state.restr.size}人</button>
@@ -2423,10 +2461,12 @@ function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk); if
     tip.style.left=x+'px'; tip.style.top=y+'px'; };
   const show=el=>{ const h=skTipHTML(el); if(!h) return; cur=el; tip.innerHTML=h; tip.hidden=false; place(el); };
   const hide=()=>{ cur=null; tip.hidden=true; };
-  document.addEventListener('mouseover',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el&&el!==cur) show(el); else if(!el&&cur) hide(); });
-  document.addEventListener('focusin',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el) show(el); });
-  document.addEventListener('focusout',hide);
-  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el){ if(cur===el) hide(); else show(el); } });
+  // 継承固有（data-skc）はクリックで表示・もう一度クリックか外側のクリックで閉じる。白因子・G1はこれまでどおりカーソルで表示
+  const pinned=()=>cur&&cur.dataset&&cur.dataset.skc!=null;
+  document.addEventListener('mouseover',e=>{ if(pinned()) return; const el=e.target.closest&&e.target.closest('[data-wsk],[data-g1l]'); if(el&&el!==cur) show(el); else if(!el&&cur) hide(); });
+  document.addEventListener('focusin',e=>{ const el=e.target.closest&&e.target.closest('[data-wsk],[data-g1l]'); if(el) show(el); });
+  document.addEventListener('focusout',()=>{ if(!pinned()) hide(); });
+  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-skc],[data-wsk],[data-g1l]'); if(el){ if(cur===el) hide(); else show(el); } else if(pinned()) hide(); });
   addEventListener('scroll',()=>{ if(cur) place(cur); },true); addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
 })();
 // ---------- 設計図：タイルをドラッグして別の枠と入れ替え → 赤因子・遺伝子・第2世代を即座に最適化し直す ----------
@@ -2645,6 +2685,201 @@ let myG1T=null;
 })();
 // 共有URL（#my=…）で開かれたとき
 try{ const h=location.hash; if(/^#my=/.test(h)){ const o=myFromCode(h.slice(4)); if(o.n.some(x=>x.c)){ myUndo.push(JSON.stringify(my)); my=o; mySave(); } history.replaceState(null,'','#my'); setTimeout(()=>openMyPage(true),0); } else if(h==='#my') setTimeout(()=>openMyPage(true),0); }catch(e){ console.warn(e); }
+// ================= 因子画像の読み込み（ゲームの「ウマ娘詳細 → 継承」画面） =================
+// バーの色で因子の種類（青・赤・緑・白）、金色の星の数で☆、因子名は端末内OCR（Tesseract.js・日本語）で読み、既知の名前と照合して補正する
+const BLUEN=['スピード','スタミナ','パワー','根性','賢さ'];
+const REDN=['芝','ダート','短距離','マイル','中距離','長距離','逃げ','先行','差し','追込'];
+const nkey=s=>norm(String(s||'').normalize('NFKC')).replace(/[・･\s　:：、,，\.。\-ー—―－'"’”!！?？（）()［］\[\]「」『』]/g,'').replace(/[○◯〇◎]/g,'○').replace(/ﾞ/g,'');
+function lev(a,b){ const m=a.length,n=b.length; if(!m) return n; if(!n) return m; let prev=Array.from({length:n+1},(_,j)=>j); for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); prev=cur; } return prev[n]; }
+const simR=(a,b)=>{ const A=nkey(a),B=nkey(b); if(!A||!B) return 0; if(A===B) return 1; return 1-lev(A,B)/Math.max(A.length,B.length); };
+function bestMatch(raw,list,min){ let best=null,bv=0; const R=nkey(raw); if(!R) return null; for(const x of list){ const n=typeof x==='string'?x:x.n; const v=simR(R,n); if(v>bv){bv=v;best=x;} } return bv>=(min||0.6)?{x:best,v:bv}:null; }
+// 白因子の辞書：スキル名・G1（ゲーム内の略称）・シナリオ因子・目覚め・遺伝子など
+let WDICT=null;
+function whiteDict(){ if(WDICT) return WDICT; const S=new Set();
+  Object.keys(D.skSup||{}).forEach(n=>S.add(n)); for(const c of Object.values(cards)){ (c.aw||[]).forEach(a=>S.add(a[0])); }
+  for(const src of Object.values(D.cwh||{})) for(const L of Object.values(src)) (L||[]).forEach(w=>S.add(w[0]));
+  const RACE_AL={'東京優駿（日本ダービー）':'日本ダービー','フェブラリーステークス':'フェブラリーS','朝日杯フューチュリティステークス':'朝日杯FS','NHKマイルカップ':'NHKマイルC','ジャパンダートダービー':'JDダービー','マイルチャンピオンシップ':'マイルCS','マイルチャンピオンシップ南部杯':'マイルCS南部杯','スプリンターズステークス':'スプリンターズS','ホープフルステークス':'ホープフルS','阪神ジュベナイルフィリーズ':'阪神JF','チャンピオンズカップ':'チャンピオンズC','ジャパンカップ':'ジャパンC'};
+  G1R.forEach(r=>{ S.add(r[1]); if(RACE_AL[r[1]]) S.add(RACE_AL[r[1]]); });
+  ['速','体','力','根','賢'].forEach(x=>S.add('アオハル点火・'+x)); ['速','体','力','根','賢','心'].forEach(x=>S.add('レースの真髄・'+x));
+  ['URAシナリオ','アオハルシナリオ','クライマックスシナリオ','グランドライブシナリオ','グランドマスターズシナリオ','L\'Arcシナリオ','UAFシナリオ','大豊食祭シナリオ','メカウマ娘シナリオ','無人島シナリオ','トレセン杯シナリオ','旅人'].forEach(x=>S.add(x));
+  [...BLUEN,'右回り','左回り','春','夏','秋','冬'].forEach(x=>S.add(x+'の目覚め')); REDN.forEach(x=>S.add(x+'の遺伝子'));
+  WDICT=[...S]; return WDICT; }
+let GDICT=null; // 緑因子（継承固有）→ 衣装
+function greenDict(){ if(GDICT) return GDICT; GDICT=[]; for(const [cid,c] of Object.entries(cards)){ if(c.u&&c.u[0]) GDICT.push({n:c.u[0][0],cid}); if(c.ui&&c.ui[0]&&c.ui[0]!==(c.u[0]||[])[0]) GDICT.push({n:c.ui[0],cid}); } return GDICT; }
+// ---- OCR（Tesseract.js を必要なときだけ読み込む。初回のみ日本語データ約15MBを取得） ----
+let OCRW=null, OCRP=null;
+function loadScript(src){ return new Promise((res,rej)=>{ if(window.Tesseract) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('script')); document.head.appendChild(s); }); }
+async function ocrWorker(onp){ if(OCRW) return OCRW; if(OCRP) return OCRP;
+  OCRP=(async()=>{ await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const w=await Tesseract.createWorker('jpn',1,{logger:m=>{ try{ onp&&onp(m); }catch(e){} }}); OCRW=w; return w; })();
+  try{ return await OCRP; }catch(e){ OCRP=null; throw e; } }
+async function ocrCanvas(cv,psm,onp){ const w=await ocrWorker(onp); await w.setParameters({tessedit_pageseg_mode:String(psm||6),preserve_interword_spaces:'1'}); const {data}=await w.recognize(cv); return data; }
+const loadImg=file=>new Promise((res,rej)=>{ const u=URL.createObjectURL(file); const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=u; });
+function imgCanvas(im){ const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight; c.getContext('2d').drawImage(im,0,0); return c; }
+// ---- バーと星の検出 ----
+let BGC=[242,243,242]; const BG=(r,g,b)=>Math.abs(r-BGC[0])<=2&&Math.abs(g-BGC[1])<=2&&Math.abs(b-BGC[2])<=2;
+function barColor(r,g,b){ if(b>200&&r<150&&g>150) return 'blue'; if(r>235&&g<190&&b>140&&b<225) return 'red'; if(g>180&&r<200&&b<130&&r>100) return 'green'; return 'white'; }
+const isGold=(r,g,b)=>r>235&&g>170&&g<235&&b<140;
+function detectFactorBars(cv){
+  const W=cv.width,H=cv.height, d=cv.getContext('2d').getImageData(0,0,W,H).data; const P=(x,y)=>{ const i=(y*W+x)*4; return [d[i],d[i+1],d[i+2]]; };
+  { const cnt=new Map(); const xs=Math.max(1,Math.round(W*0.03)); for(let y=0;y<H;y+=3){ const q=P(xs,y).join(','); cnt.set(q,(cnt.get(q)||0)+1); } BGC=[...cnt.entries()].sort((a,b)=>b[1]-a[1])[0][0].split(',').map(Number); } // 背景色（左端の余白で最も多い色）
+  const strip=[[Math.round(W*0.50),Math.round(W*0.545)],[Math.round(W*0.90),Math.round(W*0.945)]];
+  const rowOn=(col,y)=>{ const [a,b]=strip[col]; let n=0,t=0; for(let x=a;x<=b;x+=1){ const [r,g,bb]=P(x,y); t++; if(!BG(r,g,bb)) n++; } return n/t>0.85; };
+  const bars=[];
+  for(const col of [0,1]){ let y=0; while(y<H){ if(!rowOn(col,y)){ y++; continue; } let y1=y; while(y1<H&&rowOn(col,y1)) y1++; const h=y1-y;
+      if(h>=Math.max(10,W*0.045)&&h<=W*0.12){ const mx=Math.round((strip[col][0]+strip[col][1])/2), my=Math.round(y+h*0.3); const cnt={}; for(let yy=y+2;yy<y1-2;yy++) for(let xx=strip[col][0];xx<=strip[col][1];xx++){ const [r,g,b]=P(xx,yy); if((r>240&&g>240&&b>240)||(r<110&&g<110&&b<110)) continue; const k=barColor(r,g,b); cnt[k]=(cnt[k]||0)+1; }
+        if(!Object.keys(cnt).length) cnt.white=1;
+        const color=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
+        let x0=mx; while(x0>0){ const [r,g,b]=P(x0-1,my); if(BG(r,g,b)) break; x0--; } let x1=mx; while(x1<W-1){ const [r,g,b]=P(x1+1,my); if(BG(r,g,b)) break; x1++; }
+        // 星：バーの下半分の金色の列を数える
+        let gold=0, run=0, runs=[]; for(let x=x0+Math.round((x1-x0)*0.14);x<=x1;x++){ let g=false; for(let yy=Math.round(y+h*0.45);yy<Math.min(H,y1+Math.round(h*0.25));yy++){ const [r,gg,b]=P(x,yy); if(isGold(r,gg,b)){ g=true; break; } } if(g){ run++; gold++; } else if(run){ runs.push(run); run=0; } } if(run) runs.push(run);
+        const sw=Math.max(4,h*0.42); let stars=runs.filter(v=>v>=2).reduce((a,v)=>a+Math.max(1,Math.round(v/sw)),0); stars=Math.max(0,Math.min(3,stars));
+        bars.push({col,y0:y,y1,x0,x1,h,color,stars}); }
+      y=y1; } }
+  // 最初の「青（左）＋赤（右）」の行から下を因子欄とみなし、青のバーごとに1人分として区切る
+  bars.sort((a,b)=>a.y0-b.y0||a.col-b.col);
+  const start=bars.find(b=>b.color==='blue'&&b.col===0&&bars.some(c=>c.col===1&&c.color==='red'&&Math.abs(c.y0-b.y0)<b.h*0.6));
+  if(!start) return [];
+  const L=bars.filter(b=>b.y0>=start.y0-2); const secs=[]; let cur=null;
+  for(const b of L){ if(b.color==='blue'&&b.col===0){ cur={bars:[]}; secs.push(cur); } if(cur) cur.bars.push(b); }
+  return secs; }
+// 因子名の部分を切り出して白黒にし、縦に並べた1枚の画像でまとめてOCR
+function buildTextStrip(cv,secs){ const S=3, pad=14; const items=[]; secs.forEach((s,si)=>s.bars.forEach(b=>items.push({b,si})));
+  const cw=Math.max(...items.map(({b})=>Math.round((b.x1-b.x0)*0.86)))*S+pad*2; const rh=Math.max(...items.map(({b})=>Math.round(b.h*0.62)))*S+pad*2;
+  const out=document.createElement('canvas'); out.width=cw; out.height=rh*items.length; const g=out.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,out.width,out.height); g.imageSmoothingEnabled=true;
+  const tmp=document.createElement('canvas');
+  items.forEach(({b},k)=>{ const sx=b.x0+Math.round((b.x1-b.x0)*0.13), sw=Math.round((b.x1-b.x0)*0.86), sy=b.y0+Math.round(b.h*0.04), sh=Math.round(b.h*0.62);
+    tmp.width=sw*S; tmp.height=sh*S; const tg=tmp.getContext('2d'); tg.imageSmoothingEnabled=true; tg.drawImage(cv,sx,sy,sw,sh,0,0,sw*S,sh*S);
+    const id=tg.getImageData(0,0,tmp.width,tmp.height), p=id.data; const colored=b.color!=='white';
+    for(let i=0;i<p.length;i+=4){ const r=p[i],gg=p[i+1],bb=p[i+2]; const L=0.299*r+0.587*gg+0.114*bb; const ink=colored?(r>225&&gg>225&&bb>225):(L<140); const v=ink?0:255; p[i]=p[i+1]=p[i+2]=v; p[i+3]=255; }
+    tg.putImageData(id,0,0); g.drawImage(tmp,pad,k*rh+pad); b.row=k; });
+  return {canvas:out,rh,items}; }
+async function readFactorShot(file,onp){ const im=await loadImg(file); const cv=imgCanvas(im); const secs=detectFactorBars(cv);
+  if(!secs.length) throw new Error('因子の欄が見つかりませんでした（「ウマ娘詳細」の「継承」タブの画面を使ってください）');
+  let texts=null; try{ const {canvas,rh,items}=buildTextStrip(cv,secs); const data=await ocrCanvas(canvas,6,onp); texts=Array(items.length).fill('');
+    for(const ln of (data.lines||[])){ const cy=(ln.bbox.y0+ln.bbox.y1)/2; const k=Math.floor(cy/rh); if(k>=0&&k<texts.length) texts[k]+=ln.text; } }catch(e){ console.warn(e); texts=null; }
+  const res=secs.map(s=>{ const o={blue:null,red:null,green:null,whites:[]};
+    for(const b of s.bars){ const raw=texts?String(texts[b.row]||'').replace(/\s+/g,''):''; const st=b.stars||1;
+      if(b.color==='blue'){ const m=bestMatch(raw,BLUEN,0.3); o.blue={t:m?BLUEN.indexOf(m.x):0,s:st,raw}; }
+      else if(b.color==='red'){ const m=bestMatch(raw,REDN,0.3); o.red={t:m?REDN.indexOf(m.x):4,s:st,raw}; }
+      else if(b.color==='green'){ const m=bestMatch(raw,greenDict(),0.45); o.green={n:m?m.x.n:raw,cid:m?m.x.cid:null,s:st,raw}; }
+      else { const m=bestMatch(raw,whiteDict(),0.6); o.whites.push({n:m?m.x:raw,s:st,raw,ok:!!m}); } }
+    return o; });
+  return {secs:res,ocr:!!texts}; }
+// ---- 設計図への反映：state.nf[設計図キー][案番号][枠] = {c:衣装, b:青, r:赤, g:緑☆, w:[[白,☆]]} ----
+const nfCur=()=>{ const k=bpBaseKey(); return ((state.nf||{})[k]||{})[state.bpIdx]||{}; };
+function nfSet(i,v){ const k=bpBaseKey(); state.nf[k]=state.nf[k]||{}; const o=state.nf[k][state.bpIdx]=state.nf[k][state.bpIdx]||{}; if(v) o[i]=v; else delete o[i]; saveNF(); }
+// 青因子：読み込んだ枠は実際の青因子、残りの枠で目標の配分（メイン・サブ）の不足分を埋める
+function adjBlue(bf,NF){ if(!bf) return bf; const fx=[1,2,3,4,5,6].filter(n=>NF[n]&&NF[n].b); if(!fx.length) return bf;
+  const tgt={}; [1,2,3,4,5,6].forEach(n=>tgt[bf.alloc[n]]=(tgt[bf.alloc[n]]||0)+1); const alloc={...bf.alloc}, own={};
+  fx.forEach(n=>{ const t=NF[n].b.t; alloc[n]=t; own[n]=NF[n].b.s; if(tgt[t]>0) tgt[t]--; });
+  for(const n of [1,2,3,4,5,6].filter(n=>!own[n])){ const t=Object.entries(tgt).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1])[0]; if(t){ alloc[n]=+t[0]; tgt[t[0]]--; } else alloc[n]=bf.main.t; }
+  return {...bf,alloc,own}; }
+// 白因子：読み込んだ枠が持っている白因子は、同じ系統（親＋その祖）のほかの枠では取らなくてよい → 次点のスキルに入れ替える
+function adjSP(sp,NF){ if(!sp) return sp; const fx=[1,2,3,4,5,6].filter(n=>NF[n]&&NF[n].w); if(!fx.length) return sp;
+  const side=n=>n<=2?n:(n<=4?1:2); const alloc={...sp.alloc}, own={};
+  for(const sd of [1,2]){ const fam=[sd,...(sd===1?[3,4]:[5,6])]; const held=new Set(); fam.forEach(n=>{ if(NF[n]&&NF[n].w) NF[n].w.forEach(([w])=>held.add(nkey(w))); });
+    const used=new Set(Object.values(sp.alloc).flat().map(w=>w.n));
+    for(const n of fam){ if(NF[n]&&NF[n].w){ own[n]=NF[n].w; continue; }
+      const L=(sp.alloc[n]||[]).filter(w=>!held.has(nkey(w.n))); const extra=sp.on.filter(w=>!used.has(w.n)&&!held.has(nkey(w.n))); while(L.length<(sp.alloc[n]||[]).length&&extra.length) L.push(extra.shift()); alloc[n]=L; } }
+  return {...sp,alloc,own}; }
+function nfBlock(bp,i,small){ const x=nfCur()[i]; const bt=`<button type="button" class="nfUp${small?' sm':''}" data-nfup="${i}" title="ゲームの「ウマ娘詳細 → 継承」画面のスクリーンショットから、このウマ娘の因子（青・赤・緑・白）を読み込む">📷 ${x?'因子を編集':small?'因子':'因子画像を読み込む'}</button>`;
+  if(!x) return `<div class="nfb">${bt}</div>`;
+  const pills=[x.b?`<span class="pill p-blue">青 ${BLUEN[x.b.t]}☆${x.b.s}</span>`:'',x.r?`<span class="pill p-red">赤 ${REDN[x.r.t]}☆${x.r.s}</span>`:'',x.g?`<span class="pill p-green">緑☆${x.g}</span>`:'',x.w&&x.w.length?`<span class="pill p-white" title="${esc(x.w.map(([n,s])=>n+'☆'+s).join('\n'))}">白 ${x.w.length}個</span>`:''].join('');
+  return `<div class="nfb own"><span class="nfT">所持因子</span>${small?'':pills}${bt}</div>`; }
+// ---- 読み込み・編集ポップアップ ----
+let nfDraft=null;
+function openNF(i){ const bp=curBP(); if(!bp) return; const n=bp.nodes[i]; const cur=nfCur();
+  const P=parentsOf(i).filter(j=>j<31); const mk=(j)=>{ const x=cur[j]; return {node:j,ch:bp.nodes[j]?bp.nodes[j].ch:null,card:bp.nodes[j]?bp.nodes[j].card:null,blue:x&&x.b?{...x.b}:null,red:x&&x.r?{...x.r}:null,green:x&&x.g?{s:x.g}:null,whites:x&&x.w?x.w.map(([n,s])=>({n,s,ok:true})):[],on:!!x}; };
+  impDraft=null; nfDraft={i,secs:[mk(i),...P.map(mk)]}; nfDraft.secs[0].on=true; drawNF(); wfEl.hidden=false; }
+function nfSecHTML(s,k){ const role=k===0?`${ROLE(s.node)}（この枠）`:`継承元${k} → ${ROLE(s.node)}`; const chOpts=charIds.slice().sort((a,b)=>(D.chars[a]||'').localeCompare(D.chars[b]||'','ja')).map(ch=>`<option value="${ch}"${ch===s.ch?' selected':''}>${esc(D.chars[ch])}</option>`).join('');
+  const st=(v,key)=>`<select data-nfs="${k}:${key}">${[1,2,3].map(x=>`<option value="${x}"${(v||3)===x?' selected':''}>☆${x}</option>`).join('')}</select>`;
+  return `<section class="nfSec${s.on?'':' off'}"><h4><label><input type="checkbox" data-nfon="${k}" ${s.on?'checked':''}${k===0?' disabled':''}> ${esc(role)}</label>
+    ${k>0?`<select data-nfch="${k}" title="継承元のウマ娘（緑因子から自動で判定）">${chOpts}</select>`:`<span class="muted small">${esc(D.chars[s.ch]||'')}</span>`}</h4>
+    <div class="nfRow"><span class="pill p-blue">青</span><select data-nfb="${k}"><option value="">なし</option>${BLUEN.map((x,t)=>`<option value="${t}"${s.blue&&s.blue.t===t?' selected':''}>${x}</option>`).join('')}</select>${st(s.blue&&s.blue.s,'b')}
+      <span class="pill p-red">赤</span><select data-nfr="${k}"><option value="">なし</option>${REDN.map((x,t)=>`<option value="${t}"${s.red&&s.red.t===t?' selected':''}>${x}</option>`).join('')}</select>${st(s.red&&s.red.s,'r')}
+      <span class="pill p-green">緑</span><span class="small">${esc(s.green&&s.green.n||(s.card&&cards[s.card]?cards[s.card].u[0][0]:'継承固有'))}</span><select data-nfg="${k}"><option value="0"${!s.green?' selected':''}>なし</option>${[1,2,3].map(x=>`<option value="${x}"${s.green&&s.green.s===x?' selected':''}>☆${x}</option>`).join('')}</select></div>
+    <div class="nfW">${s.whites.map((w,j)=>`<span class="wch${w.ok?'':' warn'}" title="${w.ok?'':'辞書に見つからなかった名前（読み取りの結果をそのまま表示）'}${w.raw&&w.raw!==w.n?'\n読み取り：'+esc(w.raw):''}">${esc(w.n)}<select data-nfws="${k}:${j}">${[1,2,3].map(x=>`<option value="${x}"${w.s===x?' selected':''}>☆${x}</option>`).join('')}</select><button type="button" data-nfwx="${k}:${j}" aria-label="外す">×</button></span>`).join('')}
+      <span class="wadd"><input list="nfWL" data-nfwadd="${k}" placeholder="白因子を追加（名前を入力してEnter）"></span></div></section>`; }
+function drawNF(msg){ const D0=nfDraft; if(!D0) return; const n=curBP().nodes[D0.i];
+  wfEl.innerHTML=`<div class="box nfBox"><div class="hd">${ava(n.ch,48,n.card)}<h3>因子を読み込む<small>${esc(ROLE(D0.i))}：${esc(D.chars[n.ch])} ${esc(cards[n.card].t)}</small></h3><button type="button" class="x" aria-label="閉じる">×</button></div>
+    <div class="nfDrop"><label class="nfFile">📷 スクリーンショットを選ぶ<input type="file" accept="image/*" id="nfFile" hidden></label><span class="muted small">ゲームの「ウマ娘詳細」→「継承」タブの画面。本人と継承元2人の因子をまとめて読み取ります（読み取り間違いはこの画面で直せます）</span></div>
+    <div id="nfMsg" class="msg"${msg?'':' hidden'}>${msg||''}</div>
+    ${D0.secs.map(nfSecHTML).join('')}
+    <datalist id="nfWL">${whiteDict().slice(0,3000).map(w=>`<option value="${esc(w)}">`).join('')}</datalist>
+    <div class="btnRow"><button type="button" class="svSave" data-nfok>設計図に反映</button>${Object.keys(nfCur()).some(j=>D0.secs.some(s=>s.node===+j))?'<button type="button" class="pkNo" data-nfclr>読み込んだ因子を消す</button>':''}</div>
+    <p class="muted small" style="margin:8px 0 0">反映すると、この枠（と継承元）は育成済みとして因子を固定し、育成ウマ娘のオールSに足りない赤因子・青因子の配分・まだ揃っていない白因子を、ほかの枠で補うように設計図を組み直します。</p></div>`; }
+const nfMsg=t=>{ const e=document.getElementById('nfMsg'); if(e){ e.hidden=false; e.innerHTML=t; } };
+document.addEventListener('change',async e=>{ const t=e.target; if(!nfDraft||!t.closest||!t.closest('#wfModal')) return;
+  if(t.id==='nfFile'&&t.files[0]){ const f=t.files[0]; nfMsg('画像を解析しています…（初回は文字認識データの読み込みに少し時間がかかります）');
+    try{ const r=await readFactorShot(f,m=>{ if(m&&m.status) nfMsg(`文字を読み取っています… ${esc(m.status)} ${m.progress?Math.round(m.progress*100)+'%':''}`); });
+      r.secs.slice(0,nfDraft.secs.length).forEach((x,k)=>{ const s=nfDraft.secs[k]; s.on=true; s.blue=x.blue; s.red=x.red; s.green=x.green; s.whites=x.whites;
+        if(k>0&&x.green&&x.green.cid){ s.card=x.green.cid; s.ch=cards[x.green.cid].ch; } });
+      drawNF(`${r.secs.length}人分の因子を読み取りました${r.ocr?'':'（文字認識が使えない環境のため、因子名は手で選んでください。種類と☆は読み取り済み）'}。内容を確認して「設計図に反映」を押してください。`); }
+    catch(err){ drawNF(`読み取れませんでした：${esc(err.message||err)}。手で入力することもできます。`); } return; }
+  let m; const sec=k=>nfDraft.secs[+k];
+  if((m=t.dataset.nfon)!=null){ sec(m).on=t.checked; t.closest('.nfSec').classList.toggle('off',!t.checked); return; }
+  if((m=t.dataset.nfch)!=null){ const s=sec(m); s.ch=+t.value; const L=lowerCards(s.ch); s.card=L[0]||allCards(s.ch)[0]; return; }
+  if((m=t.dataset.nfb)!=null){ const s=sec(m); s.blue=t.value===''?null:{t:+t.value,s:(s.blue&&s.blue.s)||3}; return; }
+  if((m=t.dataset.nfr)!=null){ const s=sec(m); s.red=t.value===''?null:{t:+t.value,s:(s.red&&s.red.s)||3}; return; }
+  if((m=t.dataset.nfg)!=null){ const s=sec(m); s.green=+t.value?{...(s.green||{}),s:+t.value}:null; return; }
+  if((m=t.dataset.nfs)!=null){ const [k,key]=m.split(':'); const s=sec(k); const o=key==='b'?s.blue:s.red; if(o) o.s=+t.value; return; }
+  if((m=t.dataset.nfws)!=null){ const [k,j]=m.split(':'); sec(k).whites[+j].s=+t.value; return; } });
+document.addEventListener('keydown',e=>{ const t=e.target; if(!nfDraft||e.key!=='Enter'||!t.dataset||t.dataset.nfwadd==null) return; e.preventDefault(); const v=t.value.trim(); if(!v) return; const m=bestMatch(v,whiteDict(),0.85); nfDraft.secs[+t.dataset.nfwadd].whites.push({n:m?m.x:v,s:3,ok:!!m}); drawNF(); });
+document.addEventListener('click',e=>{ const q=s=>e.target.closest&&e.target.closest(s); let b;
+  if(b=q('[data-nfup]')){ e.stopPropagation(); openNF(+b.dataset.nfup); return; }
+  if(!nfDraft||!q('#wfModal')) return;
+  if(b=q('[data-nfwx]')){ const [k,j]=b.dataset.nfwx.split(':'); nfDraft.secs[+k].whites.splice(+j,1); drawNF(); return; }
+  if(q('[data-nfclr]')){ nfDraft.secs.forEach(s=>nfSet(s.node,null)); nfDraft=null; wfEl.hidden=true; redrawBP(); toast('読み込んだ因子を消しました'); return; }
+  if(q('[data-nfok]')){ const bp=curBP(); const k=bpBaseKey(); let changed=0;
+    for(const s of nfDraft.secs){ if(!s.on) continue; changed++;
+      if(s.card&&bp.nodes[s.node]&&s.card!==bp.nodes[s.node].card){ state.ovr[k]=state.ovr[k]||{}; state.ovr[k][state.bpIdx]={...(state.ovr[k][state.bpIdx]||{}),[s.node]:s.card}; }
+      nfSet(s.node,{c:s.card,b:s.blue?{t:s.blue.t,s:s.blue.s}:null,r:s.red?{t:s.red.t,s:s.red.s}:null,g:s.green?s.green.s:0,w:s.whites.map(w=>[w.n,w.s])}); }
+    nfDraft=null; wfEl.hidden=true; redrawBP(); toast(`${changed}人分の因子を反映し、ほかの枠の赤因子・青因子・白因子を組み直しました`,5000); return; } },true);
+wfEl.addEventListener('click',e=>{ if(e.target===wfEl||e.target.closest('.x')) nfDraft=null; });
+// ================= TOP：ほかのツールの設計図画像から取り込む =================
+async function readTreeImage(file,onp){ const im=await loadImg(file); let cv=imgCanvas(im);
+  if(cv.width<1400){ const s=Math.min(3,1400/cv.width); const c2=document.createElement('canvas'); c2.width=Math.round(cv.width*s); c2.height=Math.round(cv.height*s); const g=c2.getContext('2d'); g.imageSmoothingEnabled=true; g.drawImage(cv,0,0,c2.width,c2.height); cv=c2; }
+  const data=await ocrCanvas(cv,11,onp); const names=charIds.map(ch=>({ch,k:nkey(D.chars[ch])})).filter(x=>x.k.length>=2).sort((a,b)=>b.k.length-a.k.length);
+  const hits=[]; for(const ln of (data.lines||[])){ const words=(ln.words||[]); const txt=nkey(ln.text); if(!txt) continue; let used=txt;
+    for(const nm of names){ let p=used.indexOf(nm.k); while(p>=0){ const frac=(p+nm.k.length/2)/txt.length; hits.push({ch:nm.ch,x:ln.bbox.x0+(ln.bbox.x1-ln.bbox.x0)*frac,y:(ln.bbox.y0+ln.bbox.y1)/2,h:ln.bbox.y1-ln.bbox.y0}); used=used.slice(0,p)+'#'.repeat(nm.k.length)+used.slice(p+nm.k.length); p=used.indexOf(nm.k); } }
+    if(txt.length<=14&&!names.some(nm=>txt.includes(nm.k))){ const m=bestMatch(txt,names.map(x=>({n:D.chars[x.ch],ch:x.ch})),0.72); if(m) hits.push({ch:m.x.ch,x:(ln.bbox.x0+ln.bbox.x1)/2,y:(ln.bbox.y0+ln.bbox.y1)/2,h:ln.bbox.y1-ln.bbox.y0}); } }
+  hits.sort((a,b)=>a.y-b.y); const rows=[]; for(const h of hits){ const r=rows.find(r=>Math.abs(r.y-h.y)<Math.max(h.h,r.h)*1.2); if(r){ r.items.push(h); r.y=(r.y*(r.items.length-1)+h.y)/r.items.length; } else rows.push({y:h.y,h:h.h,items:[h]}); }
+  rows.forEach(r=>r.items.sort((a,b)=>a.x-b.x));
+  const slots=Array(7).fill(null); let ri=0; const take=(n,base)=>{ while(ri<rows.length&&rows[ri].items.length>n*2) ri++; if(ri>=rows.length) return; rows[ri].items.slice(0,n).forEach((h,j)=>slots[base+j]=h.ch); ri++; };
+  take(1,0); take(2,1); take(4,3);
+  if(slots.filter(Boolean).length<3){ const seq=hits.map(h=>h.ch).filter((c,j,a)=>a.indexOf(c)===j); seq.slice(0,7).forEach((c,j)=>slots[j]=c); }
+  return {slots,hits:hits.length}; }
+let impDraft=null;
+function openImport(msg){ nfDraft=null; impDraft=impDraft||{slots:Array(7).fill(null)}; const S=impDraft.slots;
+  const opts=v=>`<option value="">（未選択）</option>`+charIds.slice().sort((a,b)=>(D.chars[a]||'').localeCompare(D.chars[b]||'','ja')).map(ch=>`<option value="${ch}"${ch===v?' selected':''}>${esc(D.chars[ch])}</option>`).join('');
+  const role=['育成ウマ娘','親1','親2','祖（親1側）','祖（親1側）','祖（親2側）','祖（親2側）'];
+  wfEl.innerHTML=`<div class="box nfBox"><div class="hd"><h3>画像から設計図を取り込む<small>ほかのツールで作った設計図の画像から、育成ウマ娘・親・祖を読み取ります</small></h3><button type="button" class="x" aria-label="閉じる">×</button></div>
+    <div class="nfDrop"><label class="nfFile">🖼 設計図の画像を選ぶ<input type="file" accept="image/*" id="impFile" hidden></label><span class="muted small">このツールで保存した設計図のPNGもそのまま開けます。コースと脚質は、TOP画面で選んでいるものを使います</span></div>
+    <div id="impMsg" class="msg"${msg?'':' hidden'}>${msg||''}</div>
+    <div class="impGrid">${role.map((r,k)=>`<label class="${k===0?'c':k<=2?'p':'g'}"><span>${r}</span><select data-imp="${k}">${opts(S[k])}</select></label>`).join('')}</div>
+    <div class="btnRow"><button type="button" class="svSave" data-impok ${S[0]?'':'disabled'}>この内容で設計図を作る</button></div>
+    <p class="muted small" style="margin:8px 0 0">親・祖はこのツールの形式に変換し、育成ウマ娘の適性がオールSになるよう赤因子を自動で選びます（第2世代も自動で組みます）。読み取り間違いは上で直せます。</p></div>`;
+  wfEl.hidden=false; }
+document.addEventListener('change',async e=>{ const t=e.target; if(!impDraft||!t.closest||!t.closest('#wfModal')) return;
+  if(t.dataset&&t.dataset.imp!=null){ impDraft.slots[+t.dataset.imp]=t.value?+t.value:null; const ok=wfEl.querySelector('[data-impok]'); if(ok) ok.disabled=!impDraft.slots[0]; return; }
+  if(t.id==='impFile'&&t.files[0]){ const f=t.files[0]; const im=document.getElementById('impMsg'); const say=x=>{ if(im){ im.hidden=false; im.innerHTML=x; } };
+    try{ const buf=await f.arrayBuffer(); const tx=pngReadText(buf,'UMA-BP-DATA'); if(tx){ const L=JSON.parse(tx); if(L&&L[0]){ impDraft=null; wfEl.hidden=true; restoreSaved(L[0]); toast('保存した設計図を開きました'); return; } } }catch(err){}
+    say('画像の文字を読み取っています…（初回は文字認識データの読み込みに少し時間がかかります）');
+    try{ const r=await readTreeImage(f,m=>{ if(m&&m.status) say(`読み取り中… ${esc(m.status)} ${m.progress?Math.round(m.progress*100)+'%':''}`); });
+      impDraft.slots=r.slots; openImport(r.slots.some(Boolean)?`${r.slots.filter(Boolean).length}人を読み取りました。役割と名前を確認してください。`:'ウマ娘の名前を読み取れませんでした。下で選んでください。'); }
+    catch(err){ openImport(`読み取れませんでした（${esc(err.message||err)}）。下で選んでください。`); } } });
+document.addEventListener('click',e=>{ const q=s=>e.target.closest&&e.target.closest(s);
+  if(q('[data-impopen]')){ impDraft=null; openImport(); return; }
+  if(!impDraft||!q('#wfModal')) return;
+  if(q('[data-impok]')){ const S=impDraft.slots; if(!S[0]) return; const cids=state.cids, st=state.style;
+    const best=allCards(S[0]).map(c=>[c,scoreCard(c,cids,st).total]).sort((a,b)=>b[1]-a[1])[0][0];
+    state.sel=best; state.pin=true; state.sub='bp'; $('#umaQ').value=cards[best].n+' '+cards[best].t; refresh();
+    const byCh={}; candidates(best,state.cids,st).forEach(x=>byCh[x.ch]=x); const ov={};
+    for(let k=1;k<=6;k++){ const ch=S[k]; if(!ch) continue; const x=byCh[ch]; ov[k]=k<=2?(x&&(x.ocard||x.card))||allCards(ch)[0]:(x&&(x.ogpCard||x.gpCard))||lowerCards(ch)[0]||allCards(ch)[0]; }
+    const key=bpBaseKey(); state.ovr[key]=state.ovr[key]||{}; state.ovr[key][0]=ov; impDraft=null; wfEl.hidden=true; openBlueprintPage(0);
+    toast('取り込んだ親・祖で設計図を作り、オールSに必要な赤因子を選びました',5000); return; } },true);
+wfEl.addEventListener('click',e=>{ if(e.target===wfEl||e.target.closest('.x')) impDraft=null; });
 renderOwn();
 refresh();
 })();
