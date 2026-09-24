@@ -573,6 +573,7 @@ details.calcNote{margin-top:6px}details.calcNote summary{cursor:pointer;font-siz
 #wfModal .impGrid .c{grid-column:1/-1;max-width:260px;justify-self:center;width:100%}#wfModal .impGrid .p{grid-column:span 2}
 #wfModal .nfRow select,#wfModal .wch select{width:auto!important;min-width:0}
 @media (max-width:760px){#wfModal .impGrid{grid-template-columns:1fr 1fr}#wfModal .wadd input{min-width:0;width:100%}}
+.svSave.svPng{background:var(--turf);box-shadow:0 2px 6px rgba(46,116,83,.3)}
 /* ---------- 自作設計図 ---------- */
 body.my-open .wrap > :not(#myPage){display:none}
 #myPage[hidden]{display:none!important}
@@ -961,7 +962,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-24 21:39`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 00:29`;
 
 
 // ---- キャラアイコン ----
@@ -1744,12 +1745,31 @@ function fillLower(r,child,ctx){
       const post=Math.min(7,b+boostOf(starsFor(i,1)));
       dirtNote[i]=post>=want?`ダート${LET[b]}→${LET[post]}：第2世代にダートの赤因子☆${starsFor(i,1)}を置き、育成開始時にダート${want===2?'F':'E'}以上にする`:`ダート${LET[b]}：第2世代の枠が足りず、ダート${want===2?'F':'E'}まで上げられない`;
     } }
-  const genes=genesOf(red,starsFor);
+  // 中距離をC以上に：中距離G1に出走できないと同一G1の相性ボーナスが大きく下がるため、親・祖親の中距離がC未満なら第2世代に中距離の赤因子を置いて育成開始時に上げる
+  const midNote={}, midSlot={}, MIDW=5; let MIDSAFE=()=>true;
+  { const cardOf=i=>(ctx.force&&ctx.force[i])||(r.sel&&r.sel[i]&&r.sel[i].card)||null;
+    const mBase=i=>{ const c=cardOf(i); return c?cards[c].a[4]:charBest(chs[i],4); };
+    const totalS=()=>{ const g=genesOf(red,starsFor); return [tG,tD,tS].reduce((a,t)=>a+sProb(child.a[t],red,r.compat,t,g),0)-(lackOK()?0:5); };
+    const hardOK=()=>[1,2,3,4,5,6].every(j=>{ if(FX[j]) return true; const c=cardOf(j); const b=c?cards[c].a[red[j].t]:baseOf(j,red[j].t); return b>=7||STAR_NEED[Math.min(4,7-b)]<=starsFor(j,red[j].t); })&&Object.keys(dirtNote).every(j=>{ const c=cardOf(+j); const b=c?cards[c].a[1]:charBest(chs[+j],1); const w=chs[+j]===STAY_GOLD?2:3; return b>=w||Math.min(7,b+boostOf(starsFor(+j,1)))>=w||!/→/.test(dirtNote[j]); });
+    const safe=(n,v)=>{ const keep=red[n]; red[n]=v; const ok=hardOK(); red[n]=keep; return ok; };
+    MIDSAFE=safe;
+    for(const i of [1,2,3,4,5,6]){ if(FX[i]) continue; const b=mBase(i); if(b>=MIDW) continue;
+      const need=STAR_NEED[Math.min(4,MIDW-b)]; let guard=0;
+      while(starsFor(i,4)<need&&guard++<5){
+        const slots=[...parentsOf(i),...gpsOf(i)].filter(n=>n>=7&&red[n]&&red[n].t!==4&&!holdSlot[n]&&!dirtSlot[n]&&!midSlot[n]&&!isFx(n)&&safe(n,{t:4,s:3}));
+        if(!slots.length) break;
+        let best=null,bv=-Infinity; for(const n of slots){ const keep=red[n]; red[n]={t:4,s:3}; const v=totalS(); red[n]=keep; if(v>bv){bv=v;best=n;} }
+        red[best]={t:4,s:3}; midSlot[best]=i; }
+      const post=Math.min(7,b+boostOf(starsFor(i,4)));
+      midNote[i]=post>=MIDW?`中距離${LET[b]}→${LET[post]}：中距離G1（同一G1の相性ボーナス）に出走できるよう、第2世代に中距離の赤因子☆${starsFor(i,4)}を置いて育成開始時にC以上にする`:`中距離${LET[b]}：第2世代の枠が足りず、中距離Cまで上げられない（中距離G1に出走しにくい）`; } }
+  let genes=genesOf(red,starsFor);
   // 第2世代：ダート・マイル・中距離・長距離の適性が高いウマ娘を優先（相性が大きく劣る場合のみ別候補＋理由を記載）
   const lowerCard=[], lowerNote=[];
   if(ctx.force) for(const k in ctx.force) if(+k>=7) chs[+k]=cards[ctx.force[k]].ch; // 手動で選んだ第2世代を先に置き、同じ家系の同名を防ぐ
   for(let i=7;i<31;i++){
     if(ctx.force&&ctx.force[i]){ chs[i]=cards[ctx.force[i]].ch; lowerCard[i]=ctx.force[i]; lowerNote[i]=['未所持の代案として手動で選んだウマ娘']; continue; }
+    // 第2世代上（7〜14）の中距離がC未満なら、その親（第2世代下）に中距離の赤因子を置く
+    if(i>=15&&!isFx(i)&&!holdSlot[i]&&!dirtSlot[i]&&!midSlot[i]){ const uc=lowerCard[upOf(i)]; if(uc&&!isFx(upOf(i))){ const b=cards[uc].a[4]; if(b<MIDW&&starsFor(upOf(i),4)<STAR_NEED[Math.min(4,MIDW-b)]&&MIDSAFE(i,{t:4,s:3})){ red[i]={t:4,s:3}; midSlot[i]=upOf(i); } } }
     const up=upOf(i), upup=upOf(up), t=red[i].t;
     const excl=usedInFamilies(chs,i); for(let n=0;n<7;n++) if(chs[n]) excl.add(chs[n]); // 親・祖親と同名は第2世代にも置かない
     const cands=[];
@@ -1766,7 +1786,8 @@ function fillLower(r,child,ctx){
     if(!cands.length){ for(const x of charIds){ if(!excl.has(x)&&lowerOK(x)){ const cid=bestLowerCardFor(x,t); cands.push({x,card:cid,apt:FOUR.reduce((z,f)=>z+aptW(cards[cid].a[f]),0),rf:routeFit(chs[0],x),rot:rotOKa(cards[cid].a,x),comp:pair(chs[up],x)}); } } }
     // 第2世代の選び方：①この枠の赤因子を持てる（上で絞り込み済み） ②上の枠との相性（白因子の付きやすさ） ③同じ路線 ④マイル・中距離・長距離の適性（軽く）
     const aptML=c=>[3,4,5].reduce((z,f)=>z+aptW(cards[c.card].a[f]),0);
-    const sc=c=>c.comp+c.rf*12+aptML(c)*2-(c.rent?15:0)-(isR(c.x)?5:0);
+    const midPen=c=>{ const m=cards[c.card].a[4]; if(m>=MIDW) return 0; if(i>=15) return 60; return m>=3?4:60; }; // 中距離C未満：第2世代下は上げる手段がないので避ける
+    const sc=c=>c.comp+c.rf*12+aptML(c)*2-(c.rent?15:0)-(isR(c.x)?5:0)-midPen(c);
     const maxC=Math.max(...cands.map(c=>c.comp));
     const floor=-Infinity;
     const key=c=>sc(c); // 出走制限のあるウマ娘は第2世代では継承固有の利点がないため優先度を下げる // 同じ路線・G1ローテーション可（マイルC以上・ダートE以上）を優先し、次にダ・マ・中・長の適性
@@ -1778,10 +1799,14 @@ function fillLower(r,child,ctx){
     notes.push(...notesFor(chs[0],pick.x));
     if(holdSlot[i]) notes.push(`${ROLE(holdSlot[i])}（${D.chars[chs[holdSlot[i]]]}）の${APTN[red[i].t]}を育成開始時にAにして赤因子☆3を取るため、この枠は${APTN[red[i].t]}の赤因子`);
     if(dirtSlot[i]) notes.push(`${ROLE(dirtSlot[i])}（${D.chars[chs[dirtSlot[i]]]}）のダートを上げるため、この枠はダートの赤因子`);
+    if(midSlot[i]) notes.push(`${ROLE(midSlot[i])}（${D.chars[chs[midSlot[i]]]}）の中距離をC以上にするため（中距離G1に出走するため）、この枠は中距離の赤因子`);
     // 親以下は適性を必要以上に上げない：上げるのは「この枠の赤因子を持たせる（育成ウマ娘のオールS用）」ときだけ
     { const hn=holdNote(cards[pick.card].a,t); if(hn) notes.push(hn); }
     lowerNote[i]=notes;
   }
+  for(let i=7;i<15;i++){ const c=lowerCard[i]; if(!c||isFx(i)) continue; const b=cards[c].a[4]; if(b>=MIDW) continue; const post=Math.min(7,b+boostOf(starsFor(i,4)));
+    (lowerNote[i]=lowerNote[i]||[]).push(post>=MIDW?`中距離${LET[b]}→${LET[post]}：親（第2世代下）の中距離の赤因子で育成開始時にC以上にする`:`中距離${LET[b]}：C未満（中距離G1に出走しにくい）`); }
+  genes=genesOf(red,starsFor);
   const byCh=ctx.byCh;
   const nodes=chs.map((ch,i)=>{
     let card; if(i===0) card=ctx.id; else if(ctx.force&&ctx.force[i]) card=ctx.force[i]; else if(i<=6&&r.sel&&r.sel[i]) card=r.sel[i].card; else if(i<=2) card=byCh[ch]?.card||bestCardFor(ch,red[i].t); else if(i<=6) card=byCh[ch]?.gpCard||bestLowerCardFor(ch,red[i].t); else card=lowerCard[i]||bestLowerCardFor(ch,red[i].t);
@@ -1793,7 +1818,7 @@ function fillLower(r,child,ctx){
     const x=byCh[ch]; let green=null;
     if(i>=1&&i<=6&&x){ const isP=i<=2; const v=isP?x.inh:x.gpInh; const sp=SPECIAL_INH[card];
       green={gate:canActivate(card,ctx.cids,ctx.st), why:gateWhy(card), name:cards[card].u[0][0], v:isP?(card===x.card?v:(x.vals?.[card]||0)):(card===x.gpCard?v:(x.vals?.[card]||0)), ac:[acS(card,ctx.st),(cards[card].ac||[1,[]])[1]], special:!!sp, evolved:!!sp&&isP, fa:faAll(card,ctx.cids,ctx.st)}; }
-    return {i,ch,card,rent:i>0&&!owned(card),base,post,red:red[i],hold,compat:nodeCompat(chs,i),green,route:routeOf(ch),genes:i>=1&&i<=6?genes[i]:null,geneStars:i>=1&&i<=6?Object.fromEntries(Object.keys(genes[i]).map(t=>[t,starsFor(i,+t)])):null,notes:i>=1&&i<=6?[...(red[i]?.alt?[`${APTN[red[i].alt.from]}が${LET[red[i].alt.a]}のため${APTN[red[i].alt.from]}の赤因子は狙わず、${APTN[red[i].t]}（${LET[cards[card].a[red[i].t]]}）の赤因子にする${red[i].alt.off?'（育成ウマ娘の目標適性には効かない）':''}`]:[]),...(i<=2&&x?.req?[x.req]:[]),...(i<=2&&x?.req?[]:notesFor(chs[0],ch)),...[holdNote(cards[card].a,red[i].t),dirtNote[i]].filter(Boolean)]:(lowerNote[i]||[])};
+    return {i,ch,card,rent:i>0&&!owned(card),base,post,red:red[i],hold,compat:nodeCompat(chs,i),green,route:routeOf(ch),genes:i>=1&&i<=6?genes[i]:null,geneStars:i>=1&&i<=6?Object.fromEntries(Object.keys(genes[i]).map(t=>[t,starsFor(i,+t)])):null,notes:i>=1&&i<=6?[...(red[i]?.alt?[`${APTN[red[i].alt.from]}が${LET[red[i].alt.a]}のため${APTN[red[i].alt.from]}の赤因子は狙わず、${APTN[red[i].t]}（${LET[cards[card].a[red[i].t]]}）の赤因子にする${red[i].alt.off?'（育成ウマ娘の目標適性には効かない）':''}`]:[]),...(i<=2&&x?.req?[x.req]:[]),...(i<=2&&x?.req?[]:notesFor(chs[0],ch)),...[holdNote(cards[card].a,red[i].t),dirtNote[i],midNote[i]].filter(Boolean)]:(lowerNote[i]||[])};
   });
   const src=[...parentsOf(0),...gpsOf(0)];
   const childStars=APTN.map((_,t)=>src.reduce((a,n)=>a+(red[n]&&red[n].t===t?red[n].s:0),0));
@@ -2007,19 +2032,21 @@ function bpText(bp){
     { const L=bpG1(bp)[i]||[]; if(L.length) parts.push(`G1 ${L.length}勝`); }
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-24 21:39`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 00:29`);
   return L.join('\n');
 }
-function saveCurrentBP(){
+function saveCurrentBP(asPng){
   const bp=curBP(); if(!bp) return; const id=state.sel, k=bpBaseKey();
   const item={v:1,t:Date.now(),name:`${cards[id].n}（${state.mode==='course'?courses[state.cids[0]].name:courses[state.cids[0]].cat}・${STY[state.style]}）案${state.bpIdx+1}`,
     id,mode:state.mode,course:state.course,cond:{g:$('#cGround').value,c:$('#cCat').value,d:$('#cDist').value,t:$('#cTurn').value},cids:state.cids,style:state.style,k:state.bpIdx,
     ovr:(state.ovr[k]||{})[state.bpIdx]||null,g1:state.g1.slice(),chs:bp.chs.slice(),cards:bp.nodes.map(n=>n.card),compat:bp.compat,gsum:+bp.gsum.toFixed(2),text:bpText(bp)};
+  if(asPng){ item.nf=JSON.parse(JSON.stringify(nfCur())); return downloadBPPng(item); }
   const L=savedList(); if(L.length>=SV_MAX){ toast(`保存は${SV_MAX}件までです。「保存済み」の一覧で不要な設計図を削除してください`,5000); openSavedList(); return; }
   item.nf=JSON.parse(JSON.stringify(nfCur())); L.unshift(item);
   const ok=setSaved(L); updSvCount(); const b=$('#bpPage .svOpen'); if(b&&ok) b.textContent=`保存済み ${L.length}/${SV_MAX}`;
-  toast(ok?`アプリ内に保存しました（${L.length}/${SV_MAX}件）。画像が必要なときは「保存済み」の一覧から「画像（PNG）で保存」を押してください`:'保存できませんでした（ブラウザの保存容量がいっぱいです）',4500); return;
-  // 設計図データをファイルでダウンロード（読める文章＋読み込み用データ）
+  toast(ok?`アプリ内に保存しました（${L.length}/${SV_MAX}件）`:'保存できませんでした（ブラウザの保存容量がいっぱいです）',4000); }
+// 設計図をPNG画像でダウンロード（読み込み用データ入り：TOPの「画像から取り込む」や保存一覧の「ファイルから読み込む」で開ける）
+function downloadBPPng(item){ const ok=false;
   const d=new Date(item.t), ts=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
   toast('画像を作成しています…');
   bpPng(item).catch(err=>{ console.error(err); return null; }).then(png=>{ if(!png){ toast('画像を作れませんでした'); return; }
@@ -2100,6 +2127,7 @@ function restoreSaved(x){
 document.addEventListener('click',e=>{
   const t=e.target; if(!t.closest) return;
   if(t.closest('#svSaveBtn')){ saveCurrentBP(); return; }
+  if(t.closest('#svPngBtn')){ saveCurrentBP(true); return; }
   if(t.closest('.svOpen')){ openSavedList(); return; }
   const L=savedList(); let b;
   if(b=t.closest('[data-sv-open]')){ const x=L[+b.dataset.svOpen]; if(x) restoreSaved(x); return; }
@@ -2326,6 +2354,7 @@ function drawBlueprintPage(){
       <button type="button" class="back" id="bpBack">← ランキングに戻る</button>
       <div class="ttl"><span>設計図</span><b>${esc(child.n)}</b><small>${esc(child.t)} ・ ${esc(co.name)} ・ ${STY[st]}</small></div>
       <button type="button" class="svSave" id="svSaveBtn" title="この設計図をアプリ内に保存（100件まで）">★ 保存</button>
+      <button type="button" class="svSave svPng" id="svPngBtn" title="この設計図をPNG画像でダウンロード（画像の中に設計図のデータも入るので、あとでツールに読み込み直せます）">🖼 PNGで保存</button>
       <button type="button" class="svOpen noMgr2" title="保存した設計図の一覧">保存済み ${savedList().length}/${SV_MAX}</button>
       <button type="button" class="noMgr" title="未所持に登録した衣装の一覧">未所持 ${state.unowned.size}件</button>
       <button type="button" class="noMgr2" data-mfrombp title="この設計図を自作設計図ページに写して、自由に編集する">✎ 自作で編集</button>
