@@ -246,12 +246,22 @@ td.num{font-family:var(--mono);text-align:right;white-space:nowrap}
 .agc span.rt{outline:2px solid var(--red);outline-offset:-2px}
 .agc i{font-style:normal;font-size:10px;color:var(--muted)}
 .agc b{font-family:var(--mono);font-size:14px}
-.ag3.sm .agr{grid-template-columns:22px 1fr}.ag3.sm em{font-size:8.5px}
+.ag3.sm .agr{grid-template-columns:1fr}.ag3.sm{gap:2px}
 .ag3.sm .agc span{flex-direction:row;justify-content:center;gap:2px;padding:1px 0}
 .ag3.sm .agc i{font-size:8.5px}.ag3.sm .agc b{font-size:10.5px}
 .nt{color:var(--gold);font-size:11px;cursor:help}
 .pn.xs .f4{font-family:var(--mono);font-size:8.5px;color:var(--muted);line-height:1.2}
 .genSec{grid-column:1/-1}
+.memoTree{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}@media (max-width:760px){.memoTree{grid-template-columns:1fr}}
+.mtCol h5{margin:0 0 6px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:3px}
+.gt{border-left:3px solid var(--line);padding:4px 8px;margin:0 0 4px;border-radius:0 6px 6px 0;background:var(--panel)}
+.gt.lv0{border-left-color:var(--pink)}.gt.lv1{margin-left:14px;border-left-color:var(--gold)}.gt.lv2{margin-left:28px;border-left-color:#8fb7a0}.gt.lv3{margin-left:42px;border-left-color:var(--line)}
+.gt.has{background:var(--gold-soft)}.memoTree.only .gt:not(.has){display:none}
+.gtH{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:12px}.gtH b{display:inline-flex;align-items:center;gap:4px;font-size:12.5px}
+.gtRole{font-size:10px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;line-height:16px;background:var(--ground)}
+.gtOf{font-size:10.5px;color:var(--muted)}.gtMeta{font-size:10.5px;color:var(--muted);font-family:var(--mono);margin-left:auto}
+.gtN{margin:3px 0 0;padding-left:18px;font-size:11.5px;line-height:1.5}.gtN li{margin:1px 0}.gtN li.req{font-weight:700;color:var(--pink)}
+.memoOnly{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);margin-top:4px}
 .genList{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
 .gn{border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;display:flex;flex-direction:column;gap:1px}
 .gn.has{border-color:var(--gold);background:var(--gold-soft)}
@@ -550,7 +560,8 @@ details.calcNote{margin-top:6px}details.calcNote summary{cursor:pointer;font-siz
 .bppMain>.bpDeck{grid-column:1/-1}
 .g1c{display:inline-flex;align-items:baseline;gap:2px;font-size:11.5px;font-weight:700;color:#8a5a00;background:var(--gold-soft);border:1px solid #e3c46a;border-radius:999px;padding:1px 9px;cursor:pointer;align-self:flex-start;white-space:nowrap}
 .g1c b{font-family:var(--mono);font-size:13px}.g1c.sm{font-size:10px;padding:0 6px}.g1c.sm b{font-size:11px}.g1c.none{color:var(--muted);background:var(--ground);border-color:var(--line)}
-#skTip .g1l{list-style:none;margin:6px 0 0;padding:0;max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:3px}
+#skTip .g1l{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:3px}
+#skTip.pin{pointer-events:auto;max-height:calc(100vh - 16px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}#skTip.pin::-webkit-scrollbar{width:8px}#skTip.pin::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 #skTip .g1l li{display:grid;grid-template-columns:64px 1fr auto;gap:8px;align-items:center;border-radius:6px;padding:2px 4px}
 #skTip:has(.g1l.two){max-width:620px}#skTip .g1l.two{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}#skTip .g1l.two li.yr{grid-column:1/-1}
 #skTip .g1l li.sh{background:var(--gold-soft)}#skTip .g1l li.yr{display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-top:4px;padding:0}
@@ -580,7 +591,12 @@ details.calcNote{margin-top:6px}details.calcNote summary{cursor:pointer;font-siz
 #wfModal .lnk{font:inherit;font-size:12px;border:0;background:none;color:var(--pink);text-decoration:underline;cursor:pointer;padding:0}
 #wfModal .nfPid{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 8px;width:11em;background:var(--ground);color:var(--ink)}
 .g1act{font-size:10px;font-weight:700;color:#8a5a00;margin-left:3px}
-.scnSel{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}.scnSel select{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 4px;background:var(--panel);color:var(--ink)}
+.scnSel{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);white-space:nowrap}.scnSel select{max-width:230px}.scnSel select{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 4px;background:var(--panel);color:var(--ink)}
+.pn.s .g1rw,.pn.xs .g1rw{justify-content:flex-start;gap:3px;flex-wrap:nowrap}.pn.xs .g1rw{justify-content:center;flex-wrap:wrap;gap:2px}
+.pn.s>.rt-C,.pn.s>.rt-T{align-self:flex-start}.pn.s>.wfBtn{align-self:flex-start}.pn.xs>.wfBtn{align-self:center}
+.pn.xs .f4{display:grid;grid-template-columns:repeat(2,auto);gap:0 5px;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.3}.pn.xs .f4 b{font-size:10px;margin-left:1px;display:inline}
+.cmpOk,.cmpNg{display:inline-block;margin-left:10px;font-size:12px;font-weight:700;border-radius:999px;padding:1px 9px;vertical-align:middle}.cmpOk{color:var(--green);background:var(--green-soft)}.cmpNg{color:var(--red);background:var(--red-soft)}
+.reqTag{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:700;color:#fff;background:var(--pink);border-radius:4px;padding:0 5px;line-height:15px}
 .g1rw{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.g1ed{font:inherit;font-size:11px;font-weight:700;border:1px solid #e3c46a;background:var(--panel);color:#8a5a00;border-radius:999px;padding:1px 8px;cursor:pointer;white-space:nowrap}.g1ed.sm{padding:0 5px;font-size:10px}.g1ed:hover{background:var(--gold-soft)}
 #wfModal .g1t:disabled{opacity:.35;cursor:not-allowed;text-decoration:line-through}#wfModal .g1t.obj{box-shadow:inset 0 -2px 0 #e3c46a}
 @media (max-width:760px){#wfModal .impGrid{grid-template-columns:1fr 1fr}#wfModal .wadd input{min-width:0;width:100%}}
@@ -974,7 +990,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 13:03`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 13:48`;
 
 
 // ---- キャラアイコン ----
@@ -1418,7 +1434,7 @@ const turnKey=t=>{ const y=Math.floor((t-1)/24)+1, r=(t-1)%24; return y*100+(Mat
 const OBJ_MEMO=new Map();
 // 因子周回のシナリオ：目標あり（URA系の育成目標）／Beyond Dreams（キャラ固有の育成目標なし）
 try{ state.scn=localStorage.getItem('umaScn')==='bd'?'bd':'ura'; }catch(e){ state.scn='ura'; }
-const SCN_OPTS=[['ura','キャラ固有の育成目標（トレセン軒・温泉郷など）'],['bd','Beyond Dreams（BC路線の目標・シニア11月前半で終了）']];
+const SCN_OPTS=[['ura','固有目標（トレセン軒・温泉郷など）'],['bd','Beyond Dreams（BC路線）']];
 const scnSelHTML=()=>`<label class="scnSel" title="育成目標と同じ時期のG1に出られるかが変わります">周回シナリオ <select data-scn>${SCN_OPTS.map(([v,l])=>`<option value="${v}"${state.scn===v?' selected':''}>${l}</option>`).join('')}</select></label>`;
 function setScn(v){ state.scn=v==='bd'?'bd':'ura'; try{ localStorage.setItem('umaScn',state.scn); }catch(e){}
   for(const M of [OBJ_MEMO,G1MEMO,G1CAN,G1A,G1AC,G1FAM,bpCache]) M.clear(); }
@@ -2025,7 +2041,7 @@ const AGROWS=[['バ場',[0,1]],['距離',[2,3,4,5]],['脚質',[6,7,8,9]]];
 function aptGrid(n,small){
   const cell=t=>{const b=n.base[t],p=n.post[t],up=p>b; const isRed=n.red&&n.red.t===t;
     return `<span class="${up?'up':''}${isRed?' rt':''}" title="${APTN[t]} ${LET[b]}${up?'→'+LET[p]:''}"><i>${APTS[t]}</i><b class="L${p}">${LET[p]}</b></span>`;};
-  return `<div class="ag3${small?' sm':''}">${AGROWS.map(([lab,ts])=>`<div class="agr"><em>${lab}</em><div class="agc c${ts.length}">${ts.map(cell).join('')}</div></div>`).join('')}</div>`;
+  return `<div class="ag3${small?' sm':''}">${AGROWS.map(([lab,ts])=>`<div class="agr">${small?'':`<em>${lab}</em>`}<div class="agc c${ts.length}">${ts.map(cell).join('')}</div></div>`).join('')}</div>`;
 }
 function pageNode(bp,i,full){
   const n=bp.nodes[i], cc=cards[n.card], nm=D.chars[n.ch]||cc.n;
@@ -2036,14 +2052,14 @@ function pageNode(bp,i,full){
   const no=i>0?`<button type="button" class="noBtn" data-no="${i}" title="この枠のウマ娘を変更（一覧から選ぶ・未所持にする）">変更</button>`:'';
   const gn=i>=1&&i<=6&&n.genes?Object.entries(n.genes).map(([t,p])=>n.geneOwn&&n.geneOwn[t]?`<span class="gchip" title="読み込んだ白因子「${APTN[t]}の遺伝子」（育成ウマ娘の継承イベントで${APTN[t]}の適性を上げる）">遺伝子 ${APTN[t]} 所持</span>`:`<span class="gchip" title="因子周回時、親・祖親の${APTN[t]}赤因子☆${n.geneStars[t]}">遺伝子 ${APTN[t]} ${p>=1?'確定':'40%'}</span>`).join(''):'';
   const HT=n.rent?'<sup class="rent" title="未所持：フレンドからレンタルする前提">♥</sup>':'';
-  if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${fourStr(n.base)}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div>${g1Badge(bpG1(bp),i,upOf(i),true)}<button type="button" class="g1ed sm" data-g1ed="${i}" title="勝ったG1を選んでG1勝利数に反映する">🏆</button>${wf}${mini}</div>`;
-  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}${g1Badge(bpG1(bp),i,upOf(i),true)}<button type="button" class="g1ed sm" data-g1ed="${i}" title="勝ったG1を選んでG1勝利数に反映する">🏆</button>${wf}${nfBlock(bp,i,true)}${mini}<span class="pc">育成時の相性 <b>${n.compat+g1B(bp,i)}</b></span></div>`;
+  if(i>=15&&!full) return `<div class="pn xs${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<div class="xsb" title="${esc(nm)} ${esc(cc.t)}${n.rent?'（レンタル）':''}\n${fourStr(n.base)}${n.notes.length?'\n'+esc(n.notes.join('\n')):''}"><b>${ava(n.ch,20,n.card)}${esc(nm)}${HT}${n.notes.length?'<span class="nt">ⓘ</span>':''}</b>${n.route?`<span class="rdot rt-${n.route}" title="${RNAME[n.route]}路線">${n.route==='C'?'ク':'テ'}</span>`:''}<span class="f4">${FOUR.map(f=>`<span>${APTS[f]}<b class="L${n.base[f]}">${LET[n.base[f]]}</b></span>`).join('')}</span><span class="pill p-red${n.hold?'':' warn'}">${APTS[n.red.t]}☆${n.red.s}</span></div><div class="g1rw">${g1Badge(bpG1(bp),i,upOf(i),true)}<button type="button" class="g1ed sm" data-g1ed="${i}" title="勝ったG1を選んでG1勝利数に反映する">🏆</button></div>${wf}${mini}</div>`;
+  if(i>=7&&!full) return `<div class="pn s${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}<b>${ava(n.ch,26,n.card)}${esc(nm)}${HT}${n.notes.length?' <span class="nt" title="'+esc(n.notes.join('\n'))+'">ⓘ</span>':''}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}${aptGrid(n,true)}${redChip(n)}<div class="g1rw">${g1Badge(bpG1(bp),i,upOf(i),true)}<button type="button" class="g1ed sm" data-g1ed="${i}" title="勝ったG1を選んでG1勝利数に反映する">🏆</button></div>${wf}${nfBlock(bp,i,true)}${mini}<span class="pc">育成時の相性 <b>${n.compat+g1B(bp,i)}</b></span></div>`;
   return `<div class="pn ${i===0?'me':i<=2?'par':i<=6?'gp':'gp lo'}${full?' full':''}${n.rent?' isRent':''}" data-i="${i}"${i>0?' data-dnd="1" title="ドラッグして別の枠に重ねると入れ替え"':''}>${no}
     <div class="pcols"><div class="pcA">
     <div class="ph">${ava(n.ch,i===0?60:48,n.card)}<span class="role">${role}${n.rent?'<span class="rentTag">レンタル</span>':''}</span><b>${esc(nm)}${HT}</b><small>${esc(cc.t)}</small>${n.route?`<span class="rt-${n.route}">${RNAME[n.route]}</span>`:''}</div>
     ${full?'':mini}
     ${i<=6&&curCtx?timingBar(n.card,curCtx.cids,curCtx.st,i===0):''}
-    ${i>=1&&n.notes.length?`<details class="pnote"${n.notes.some(t=>/必須/.test(t))?' open':''}><summary>ⓘ 選定メモ（${n.notes.length}）</summary>${n.notes.map(t=>esc(t)).join('<br>')}</details>`:''}
+    ${i>=1&&n.notes.length?`<details class="pnote"><summary>ⓘ 選定メモ（${n.notes.length}）${n.notes.some(t=>/必須/.test(t))?'<span class="reqTag">必須の親</span>':''}</summary>${n.notes.map(t=>esc(t)).join('<br>')}</details>`:''}
     ${aptGrid(n)}
     </div><div class="pcB">
     <div class="pf">${i===0?`<span class="pill p-pink">相性 <b>${n.compat+g1B(bp,0)}</b></span>`:(curBF&&curBF.alloc[i]!=null&&i<=6?blueChip(curBF.alloc[i],curBF.own&&curBF.own[i]):'')+redChip(n)}</div>
@@ -2146,6 +2162,14 @@ function setSaved(L){ try{ localStorage.setItem(SV_KEY,JSON.stringify(L)); retur
 const svToastEl=document.createElement('div'); svToastEl.id='svToast'; svToastEl.hidden=true; svToastEl.setAttribute('role','status'); document.body.appendChild(svToastEl);
 let svT=null; function toast(m,ms){ svToastEl.textContent=m; svToastEl.hidden=false; clearTimeout(svT); svT=setTimeout(()=>svToastEl.hidden=true,ms||2600); }
 function updSvCount(){ const n=savedList().length; const e=$('#svCount'); if(e) e.textContent=n; }
+// 選定メモ：家系図と同じ並び（親1系統→親2系統、各枠の下にその親を字下げして並べる）
+function memoTreeHTML(bp){ const lv=i=>i<=2?0:i<=6?1:i<15?2:3, LB=['親','祖','第2世代上','第2世代下'];
+  const row=i=>{ const n=bp.nodes[i]; if(!n) return ''; const up=upOf(i), req=n.notes.some(t=>/必須/.test(t));
+    const meta=[n.route?RNAME[n.route]:'',FOUR.map(f=>APTS[f]+LET[n.base[f]]).join(' '),n.red?`赤 ${APTN[n.red.t]}☆${n.red.s}`:''].filter(Boolean).join('・');
+    return `<div class="gt lv${lv(i)}${n.notes.length?' has':''}"><div class="gtH"><span class="gtRole">${i<=2?'親'+i:LB[lv(i)]}</span><b>${ava(n.ch,20,n.card)}${esc(D.chars[n.ch])}</b>${i>2?`<span class="gtOf">${esc(D.chars[bp.nodes[up].ch])}の親</span>`:''}${req?'<span class="reqTag">必須の親</span>':''}<span class="gtMeta">${esc(meta)}</span></div>${n.notes.length?`<ul class="gtN">${n.notes.map(t=>`<li${/必須/.test(t)?' class="req"':''}>${esc(t)}</li>`).join('')}</ul>`:''}</div>`; };
+  const dfs=(i,out)=>{ out.push(row(i)); for(const q of parentsOf(i)) if(q<31) dfs(q,out); return out; };
+  return `<label class="memoOnly"><input type="checkbox" data-memoonly> メモのある枠だけ表示</label><div class="memoTree">${[1,2].map(k=>`<div class="mtCol"><h5>親${k}の系統</h5>${dfs(k,[]).join('')}</div>`).join('')}</div>`; }
+document.addEventListener('change',e=>{ const t=e.target; if(t.matches&&t.matches('[data-memoonly]')){ const m=t.closest('.genSec').querySelector('.memoTree'); if(m) m.classList.toggle('only',t.checked); } });
 const ROLE=i=>i===0?'育成ウマ娘':i<=2?`親${i}`:i<=6?`祖親（親${i<=4?1:2}側）`:i<15?'第2世代上':'第2世代下';
 function bpText(bp){
   const id=state.sel, c=cards[id], co=courses[state.cids[0]], bf=curBF||blueFactors(id,state.cids,state.style), sp=curSP||skillPlan(id,state.cids,state.style);
@@ -2161,7 +2185,7 @@ function bpText(bp){
     { const L=bpG1(bp)[i]||[]; if(L.length) parts.push(`G1 ${L.length}勝`); }
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 13:03`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 13:48`);
   return L.join('\n');
 }
 function saveCurrentBP(asPng){
@@ -2497,7 +2521,7 @@ function drawBlueprintPage(){
     <div class="bppMain">
       ${deckPanelHTML('bp')}
       <div class="bppOver">
-        <section><h4>相性</h4>${(()=>{ const CP=compatParts(bp.chs,0,bpG1(bp)); return `<div class="big"><b>${bp.compat+g1B(bp,0)}</b></div><p class="muted small" style="margin:0 0 4px">親1 <b>${CP[1]||0}</b> ＋ 親2 <b>${CP[2]||0}</b>（ゲーム内と同じく親ごとの相性値の合計）／祖 ${[3,4,5,6].map(g=>CP[g]||0).join('・')}</p>`; })()}
+        <section><h4>相性</h4>${(()=>{ const CP=compatParts(bp.chs,0,bpG1(bp)); const tot=bp.compat+g1B(bp,0); return `<div class="big"><b>${tot}</b>${tot>=COMPAT_MIN?'<span class="cmpOk">✓ 目標400以上</span>':`<span class="cmpNg">目標400まで あと${COMPAT_MIN-tot}</span>`}</div><p class="muted small" style="margin:0 0 4px">親1 <b>${CP[1]||0}</b> ＋ 親2 <b>${CP[2]||0}</b>（ゲーム内と同じく親ごとの相性値の合計）／祖 ${[3,4,5,6].map(g=>CP[g]||0).join('・')}</p>`; })()}
           <table class="kv"><tr><th>本人×親1</th><td class="num">${p.cp1}</td></tr><tr><th>本人×親2</th><td class="num">${p.cp2}</td></tr><tr><th title="親1・親2の両方の相性値に入る">親1×親2（×2）</th><td class="num">${p.pp}×2</td></tr><tr><th>本人×親×祖</th><td class="num">${p.tri.join(' + ')}</td></tr><tr><th title="親1×親2の共通G1は両方の親に入る">同一G1</th><td class="num">+${g1B(bp,0)}</td></tr>${nRestr(bp.chs,[1,2,3,4,5,6])?`<tr><th title="出走制限のあるウマ娘は特殊ローテで因子周回するため同一G1が稼ぎにくい">出走制限（目安）</th><td class="num">−${RESTR_PEN*nRestr(bp.chs,[1,2,3,4,5,6])}</td></tr>`:''}</table><p class="muted small" style="margin:6px 0 0">同一G1：各枠が因子周回で勝つG1（育成シナリオで出走でき、赤因子で上げた後の適性で勝てるもの）から、親1×親2・親×祖の組ごとに両方が勝つレース1つにつき+${G1PT}。各枠の「G1 ◯勝」をクリックするとレース一覧を表示します。</p></section>
         <section><h4>本人の適性（目標：すべてS）</h4><table class="kv">${tgt}</table><details class="calcNote"><summary>S確率の計算の前提</summary><p class="muted small" style="margin:4px 0 0">育成開始時に☆数でAまで上げ、クラシック4月・シニア4月の継承イベントで赤因子が発動するとSになります。赤因子に加えて、親・祖親に「〇〇の遺伝子」（白因子）が付くよう第2世代の赤因子を配置しています（因子周回時に親・祖親の同じ赤因子☆12以上で確定、☆6以上で40%）。継承イベントでの発動率は「基礎率×(1＋その継承ウマ娘の相性値÷100)」（赤因子の基礎率 ☆1 1%・☆2 3%・☆3 5%。遺伝子は☆2相当の3%とした目安）で、親・祖それぞれの相性値を使います。継承イベント2回・ウマプランで各回2パターンから良い方を選ぶ前提の目安です（適性ごとにそれぞれ狙った場合）。育成ウマ娘は目標レースだけ出走する前提です。</p></details></section>
         <section><h4>路線</h4>${(()=>{const R=routeOf(bp.chs[0]); const ns=bp.nodes.slice(1); const m=ns.filter(n=>routeFit(bp.chs[0],n.ch)===2).length, sc=ns.filter(n=>routeFit(bp.chs[0],n.ch)===1).length, ng=ns.filter(n=>routeFit(bp.chs[0],n.ch)===0).length;
@@ -2526,7 +2550,7 @@ function drawBlueprintPage(){
         <section><h4>緑因子（継承固有）</h4><ul class="gl">${greens}</ul></section>
         ${bp.warn.length?`<section><h4>確認事項</h4><ul class="gl">${bp.warn.map(n=>`<li><span class="pill p-red">⚠</span> ${esc(D.chars[n.ch])}：${APTN[n.red.t]}がAに届かず赤因子を取得できません</li>`).join('')}</ul></section>`:''}
         ${state.deck.length?`<section class="skSec"><h4>白因子（スキル因子）</h4><p class="muted small" style="margin:0 0 6px">育成ウマ娘と編成サポカで取得できるスキルを除いた、このコース・脚質で有効な順です。クリックで有効／無効を切り替え、有効なもの上位12件を親・祖に2件ずつ割り当てます。</p>${skillChipsHTML(curSP)}</section>`:''}
-        <details class="genSec"><summary><h4>選定メモ（路線・適性・相性の理由）</h4><span class="muted small">${bp.nodes.slice(1).filter(n=>n.notes.length).length}件</span></summary><p class="muted small" style="margin:6px 0">同じ路線のG1を走れるウマ娘を優先し（親以下の適性は、赤因子を持たせるのに必要な分しか上げません）、第2世代は次にダート・マイル・中距離・長距離の適性が高いウマ娘を優先しています。同じ家系（本人・親2人・祖4人）に同名はいません。親・祖親と同名のウマ娘は第2世代にも置いていません。</p><div class="genList">${bp.nodes.slice(1,7).filter(n=>n.notes.length).map(n=>`<div class="gn has"><b>${esc(D.chars[n.ch])}</b><span class="muted">${n.i<=2?'親':'祖親'}</span>${n.notes.map(t=>`<small>・${esc(t)}</small>`).join('')}</div>`).join('')}${bp.nodes.slice(7).map(n=>`<div class="gn${n.notes.length?' has':''}"><b>${esc(D.chars[n.ch])}</b><span class="muted">${n.i<15?'第2世代上':'第2世代下'}・${n.route?RNAME[n.route]+'・':''}${fourStr(n.base)}・赤 ${APTN[n.red.t]}☆${n.red.s}</span>${n.notes.map(t=>`<small>・${esc(t)}</small>`).join('')}</div>`).join('')}</div></details>
+        <details class="genSec"><summary><h4>選定メモ（路線・適性・相性の理由）</h4><span class="muted small">${bp.nodes.slice(1).filter(n=>n.notes.length).length}件</span></summary><p class="muted small" style="margin:6px 0">同じ路線のG1を走れるウマ娘を優先し（親以下の適性は、赤因子を持たせるのに必要な分しか上げません）、第2世代は次にダート・マイル・中距離・長距離の適性が高いウマ娘を優先しています。同じ家系（本人・親2人・祖4人）に同名はいません。親・祖親と同名のウマ娘は第2世代にも置いていません。</p>${memoTreeHTML(bp)}</details>
         <p class="muted small">赤因子の段階：同系統☆合計 1-3→+1 / 4-6→+2 / 7-9→+3 / 10以上→+4（上限A）。赤因子はその枠の適性がA以上でないと付きません。色付きのマスは赤因子で上がった適性、枠付きのマスはその枠に持たせる赤因子です。</p>
       </aside>
     </div>
@@ -2627,7 +2651,7 @@ function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk); if
     const box=el.closest('#wfModal .box'); if(box){ const B=box.getBoundingClientRect(); const yy=Math.min(Math.max(8,r.top-20),vh-H-8); // ポップアップ内では一覧を隠さないよう横に出す
       if(B.right+10+W<=vw-8){ x=B.right+10; y=yy; } else if(B.left-10-W>=8){ x=B.left-10-W; y=yy; } }
     tip.style.left=x+'px'; tip.style.top=y+'px'; };
-  const show=el=>{ const h=skTipHTML(el); if(!h) return; cur=el; tip.innerHTML=h; tip.hidden=false; place(el); };
+  const show=el=>{ const h=skTipHTML(el); if(!h) return; cur=el; tip.innerHTML=h; tip.classList.toggle('pin',el.dataset.skc!=null||el.dataset.g1l!=null); tip.scrollTop=0; tip.hidden=false; place(el); }; // クリックで開いたポップアップ（G1一覧・継承固有）は中をスクロールできる
   const hide=()=>{ cur=null; tip.hidden=true; };
   // 継承固有（data-skc）はスキル名の右の「ⓘ」をクリック、G1勝利数（data-g1l）はクリックで表示。もう一度クリックか外側のクリックで閉じる。白因子はこれまでどおりカーソルで表示
   const pinned=()=>cur&&cur.dataset&&(cur.dataset.skc!=null||cur.dataset.g1l!=null);
@@ -2637,7 +2661,7 @@ function skTipHTML(el){ if(el.dataset.wsk) return wskTipHTML(el.dataset.wsk); if
   document.addEventListener('focusout',()=>{ if(!pinned()) hide(); });
   document.addEventListener('click',e=>{ const el=target(e); if(el){ e.stopPropagation(); if(cur===el) hide(); else show(el); } else if(pinned()&&!(e.target.closest&&e.target.closest('#skTip'))) hide(); },true);
   document.addEventListener('keydown',e=>{ if(e.key!=='Enter'&&e.key!==' ') return; const el=e.target.closest&&e.target.closest('[data-skc],[data-g1l]'); if(!el) return; e.preventDefault(); if(cur===el) hide(); else show(el); });
-  addEventListener('scroll',()=>{ if(cur) place(cur); },true); addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
+  addEventListener('scroll',e=>{ if(cur&&!(e.target&&e.target.closest&&e.target.closest('#skTip'))) place(cur); },true); addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
 })();
 // ---------- 設計図：タイルをドラッグして別の枠と入れ替え → 赤因子・遺伝子・第2世代を即座に最適化し直す ----------
 // ブラウザ標準のドラッグ＆ドロップは環境（埋め込み表示・画像や文字の上など）で効かないことがあるため、マウス／タッチの移動で自前で処理する
