@@ -45,7 +45,14 @@
 /* 視線誘導：ステップ見出し */
 .stepLab{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
 .stepLab b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--pink);color:#fff;font-size:12px}
-.stepLab.s2 b{background:var(--turf)}.stepLab.s3 b{background:var(--blue)}
+.stepLab.s2 b{background:var(--turf)}.stepLab.s3 b{background:var(--blue)}.stepLab.s4 b{background:var(--gold)}
+.nlBox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:16px 0 10px}
+.nlBox textarea{width:100%;box-sizing:border-box;font:inherit;font-size:14px;line-height:1.6;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--ground);color:var(--ink);resize:vertical;min-height:72px}
+.nlRow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:8px}.nlEx{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center}
+.nlEx button,.nlBanChip{font:inherit;font-size:11.5px;border:1px solid var(--line);background:var(--ground);color:var(--ink);border-radius:999px;padding:2px 9px;cursor:pointer}
+.nlSum{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.nlc{display:inline-flex;align-items:baseline;gap:6px;border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:12.5px;background:var(--ground)}
+.nlc>small{font-size:10.5px;color:var(--muted);font-weight:700}.nlc.hi{border-color:var(--pink);background:var(--pink-soft)}.nlc.warn{border-color:#e0a13a;background:#fff5e0}.nlc em{font-style:normal;color:var(--muted)}
+.nlBan{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}.nlErr{color:var(--red);font-weight:700;margin:6px 0 0}
 /* レンタル（未所持） */
 sup.rent,span.rent{color:var(--heart);font-size:.85em;margin-left:2px;vertical-align:super;line-height:0;font-weight:700}
 .rentTag{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#fff;background:var(--heart);border-radius:4px;padding:0 5px;letter-spacing:0;vertical-align:1px}
@@ -722,6 +729,15 @@ body.my-open .wrap > :not(#myPage){display:none}
   <section class="detail" id="detail" aria-live="polite"></section>
 </div>
 
+<section class="nlBox" aria-label="文章で条件を伝えて設計図を作る">
+  <p class="stepLab s4"><b>✎</b>文章で条件を伝えて設計図を作る</p>
+  <textarea id="nlText" rows="3" placeholder="例：アーモンドアイで東京芝2400mの先行。エピファネイアは未所持、ゴールドシップは使わない。親にキタサンブラックを入れたい。周回はBeyond Dreams"></textarea>
+  <div class="nlRow"><button type="button" id="nlGo" class="svSave">解析して設計図を作る</button>
+    <span class="nlEx"><small class="muted">例：</small><button type="button" data-nlex="有馬記念をキタサンブラックの逃げで走りたい">有馬記念×逃げ</button><button type="button" data-nlex="阪神ダート2000mの差しで一番強い設計図。ステイゴールドは持っていない">ダート2000・差し</button><button type="button" data-nlex="スペシャルウィークで中山2500の差し。親にマルゼンスキーを入れたい">親を指定</button></span></div>
+  <p class="muted small" style="margin:4px 0 0">ウマ娘名（あだ名・衣装名も可）・レース場・距離・芝/ダート・脚質・G1レース名・「未所持」「使わない」「親に入れたい」・周回シナリオを読み取ります（Ctrl+Enterでも実行）。解析は端末内だけで行います。</p>
+  <div id="nlOut"></div>
+</section>
+
 <div id="bpPage" hidden></div>
 <div id="myPage" hidden></div>
 <details class="foot"><summary>計算方法とデータについて</summary><p>
@@ -990,7 +1006,7 @@ optSum(); ['#optMinB','#optBoost','#optOneChar'].forEach(x=>$(x).addEventListene
 document.addEventListener('toggle',e=>{const d=e.target; if(d.dataset&&d.dataset.fold) state[d.dataset.fold]=d.open;},true);
 document.addEventListener('click',e=>{const d=$('#optBox'); if(d.open&&!d.contains(e.target)) d.open=false;});
 for(const id of ['#optMinB','#optBoost','#optOneChar']) $(id).addEventListener('change',()=>{state.boost=$('#optBoost').checked; refresh();});
-$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 13:48`;
+$('#dataInfo').textContent=`育成ウマ娘 ${cardIds.length}枚 / サポカ ${(D.sup||[]).length}枚 / コース ${Object.keys(courses).length} ・ データ取得 ${fmtDate(D.crawledAt)}（${DB_SRC}） ・ ツール版 2026-09-25 17:15`;
 
 
 // ---- キャラアイコン ----
@@ -1245,7 +1261,7 @@ const ovMul=(cid,st)=>ovMul0(cid,st)*posMul(cid,st)*rkMul(cid,st);
 function candidates(id,cids,st){
   const child=cards[id]; const inh=inhMap(cids,st); const needs=childNeeds(id,cids,st).filter(n=>n.v<7);
   const out=[];
-  for(const ch of charIds){ if(ch===child.ch) continue;
+  for(const ch of charIds){ if(ch===child.ch||state.ban.has(ch)) continue; // 「使わない」に指定したウマ娘は候補にしない
     const comp=pair(child.ch,ch);
     // 継承固有の効果量 × 発動しやすさ係数（順位条件が厳しい固有は優先度を下げる）
     // 親として：特殊継承カードは進化後の効果量 ／ 祖として：通常の継承固有のみ
@@ -1725,7 +1741,7 @@ function g1FamBonus(cs){ const key=cs.join(','); let v=G1FAM.get(key); if(v!=nul
 const G1AC=new Map(); function g1ApproxC(card){ let v=G1AC.get(card); if(!v){ v=g1Wins(cards[card].ch,g1Lift([...cards[card].a])); G1AC.set(card,v); } return v; }
 function planBlueprints(id,cids,st){
   const baseKey=id+'|'+cids.join(',')+'|'+st; const OV=state.ovr[baseKey]||{};
-  const key=baseKey+'|'+state.boost+'|'+[...state.unowned].sort().join(',')+'|'+[...state.restr].sort().join(',')+'|'+JSON.stringify(OV)+'|'+JSON.stringify((state.nf||{})[baseKey]||{}); if(bpCache.has(key)) return bpCache.get(key);
+  const key=baseKey+'|'+state.boost+'|'+[...state.unowned].sort().join(',')+'|'+[...state.restr].sort().join(',')+'|'+[...(state.ban||[])].sort().join(',')+'|'+JSON.stringify(OV)+'|'+JSON.stringify((state.nf||{})[baseKey]||{}); if(bpCache.has(key)) return bpCache.get(key);
   const child=cards[id], c=child.ch, co=courses[cids[0]];
   const tG=co.ground==='芝'?0:1, tD=CATIDX[co.cat], tS=5+st;
   const cands=candidates(id,cids,st); const byCh={}; cands.forEach(x=>byCh[x.ch]=x);
@@ -1765,7 +1781,7 @@ function planBlueprints(id,cids,st){
   const gpCache={};
   let G1MODE=false; const g1n=(a,b)=>g1Cnt(g1Approx(a),g1Approx(b));
   const gpList=p=>gpCache[p]||(gpCache[p]=gpList0(p));
-  const gpList0=p=>{ const A=charIds.filter(g=>g!==c&&g!==p&&lowerOK(g)).map(g=>{ const O=gOpts(g); const bo=O.slice().sort((a,b)=>effV(b)-effV(a))[0]; return {g,O,t:triple(c,p,g),v:Math.round(((bo?effV(bo):0)-(isR(g)?RESTR_BA:0))*100)*100+(bo&&canActivate(bo.card,cids,st)>0?3:0)+triple(c,p,g)-(isR(g)?RESTR_PEN:0)+(slots6.some(t=>charBestL(g,t)>=7)?0.25:0)+RW(c,g)*0.5}; }).filter(x=>x.O.length); const L=A.slice().sort((a,b)=>b.v-a.v).slice(0,10);
+  const gpList0=p=>{ const A=charIds.filter(g=>g!==c&&g!==p&&lowerOK(g)&&!state.ban.has(g)).map(g=>{ const O=gOpts(g); const bo=O.slice().sort((a,b)=>effV(b)-effV(a))[0]; return {g,O,t:triple(c,p,g),v:Math.round(((bo?effV(bo):0)-(isR(g)?RESTR_BA:0))*100)*100+(bo&&canActivate(bo.card,cids,st)>0?3:0)+triple(c,p,g)-(isR(g)?RESTR_PEN:0)+(slots6.some(t=>charBestL(g,t)>=7)?0.25:0)+RW(c,g)*0.5}; }).filter(x=>x.O.length); const L=A.slice().sort((a,b)=>b.v-a.v).slice(0,10);
     if(G1MODE){ const k=x=>x.t+G1PT*g1n(p,x.g); A.sort((a,b)=>k(b)-k(a)); for(const x of A.slice(0,6)) if(!L.includes(x)) L.splice(Math.min(L.length,5),0,x); } return L; };
   // 祖2人の組み合わせ候補（継承固有→相性の順。レンタルは片方まで）
   const gpPairs=(p,ex)=>{ const L0=gpList(p).filter(x=>!ex.has(x.g)); const L=L0.slice(0,7); if(faNeed) L0.slice(7).filter(x=>x.O.some(o=>o.fa)).slice(0,3).forEach(x=>L.push(x)); const out=[];
@@ -1916,7 +1932,7 @@ function fillLower(r,child,ctx){
     const excl=usedInFamilies(chs,i); for(let n=0;n<7;n++) if(chs[n]) excl.add(chs[n]); // 親・祖親と同名は第2世代にも置かない
     const cands=[];
     const sib=i%2===1?i+1:i-1, sibRent=sib<i&&lowerCard[sib]&&!owned(lowerCard[sib]); // 兄弟枠がレンタルなら、この枠は所持しているウマ娘に限る
-    for(const x of charIds){ if(excl.has(x)||!lowerOK(x)) continue;
+    for(const x of charIds){ if(excl.has(x)||!lowerOK(x)||state.ban.has(x)) continue;
       let bc=null,bs=-1,rent=false;
       for(const pass of [0,1]){ if(bc) break; if(pass===1&&sibRent) break;
         const mk=x+'|'+t+'|'+pass; let hit=LOWBEST.get(mk);
@@ -2185,7 +2201,7 @@ function bpText(bp){
     { const L=bpG1(bp)[i]||[]; if(L.length) parts.push(`G1 ${L.length}勝`); }
     if(i===7) L.push('―― 第2世代 ――');
     L.push(`${ROLE(i)}：${D.chars[n.ch]} ${cc.t}${n.rent?'（♥レンタル）':''}　${parts.join(' / ')}`); }
-  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 13:48`);
+  L.push('',`保存日時 ${new Date().toLocaleString('ja-JP')}　ツール版 2026-09-25 17:15`);
   return L.join('\n');
 }
 function saveCurrentBP(asPng){
@@ -3170,6 +3186,102 @@ document.addEventListener('click',e=>{ const q=s=>e.target.closest&&e.target.clo
     const key=bpBaseKey(); state.ovr[key]=state.ovr[key]||{}; state.ovr[key][0]=ov; impDraft=null; wfEl.hidden=true; openBlueprintPage(0);
     toast('取り込んだ親・祖で設計図を作り、オールSに必要な赤因子を選びました',5000); return; } },true);
 wfEl.addEventListener('click',e=>{ if(e.target===wfEl||e.target.closest('.x')) impDraft=null; });
+// ================= TOP：文章で条件を伝えて設計図を作る（端末内でルールベースに解析） =================
+const NL_TRK=id=>id<10100?'1'+String(id-10000).padStart(2,'0'):'11'+String(id-10100); // G1のレース場ID → コースIDの先頭3桁
+const NL_TRACK_AL={'サンタアニタ':'サンタアニタパーク','サンタアニタパーク':'サンタアニタパーク','デルマー':'デルマー','ロンシャン':'ロンシャン'};
+function nlCourseOf(trackPrefix,dist,ground){ const L=Object.values(courses).filter(c=>c.id.slice(0,3)===trackPrefix&&c.dist===dist&&(!ground||c.ground===ground)); return L.sort((a,b)=>(b.hasEff-a.hasEff)||(a.name.includes('(')-b.name.includes('(')))[0]||null; }
+let NL_IDX=null;
+function nlIndex(){ if(NL_IDX) return NL_IDX; const K=[];
+  for(const ch of charIds){ const nm=D.chars[ch]; if(nm) K.push({k:norm(nm),ch}); for(const cid of (charCards[ch]||[])){ const c=cards[cid]; if(c.k&&norm(c.k).length>=2) K.push({k:norm(c.k),ch}); const tt=norm(String(c.t||'').replace(/[［\[\]］]/g,'')); if(tt.length>=3) K.push({k:tt,ch,card:cid}); } }
+  const R=[]; for(const r of G1R){ const co=nlCourseOf(NL_TRK(r[5]),r[3],r[2]===1?'芝':'ダート'); if(!co) continue; R.push({k:norm(r[1]),co:co.id,nm:r[1]}); for(const a of (G1AL[r[1]]||[])) R.push({k:norm(a),co:co.id,nm:r[1]}); }
+  const ls=Object.values(courses).find(c=>c.track==='ロンシャン'&&c.dist===2400); if(ls) R.push({k:norm('凱旋門賞'),co:ls.id,nm:'凱旋門賞'});
+  K.sort((a,b)=>b.k.length-a.k.length); R.sort((a,b)=>b.k.length-a.k.length); NL_IDX={K,R}; return NL_IDX; }
+function nlParse(text){
+  const t0=String(text||'').normalize('NFKC').replace(/[\s・･]/g,''), tk=toKata(t0).toLowerCase(); const used=new Array(t0.length).fill(false);
+  const take=(k)=>{ const out=[]; let p=tk.indexOf(k); while(p>=0){ if(!used.slice(p,p+k.length).some(Boolean)){ out.push(p); for(let i=p;i<p+k.length;i++) used[i]=true; } p=tk.indexOf(k,p+1); } return out; };
+  const {K,R}=nlIndex(); const res={ment:[],notes:[]};
+  for(const r of R) if(take(r.k).length&&!res.race){ res.race=r; }
+  const ment=[]; for(const x of K) for(const p of take(x.k)) ment.push({...x,p,e:p+x.k.length}); ment.sort((a,b)=>a.p-b.p);
+  // 役割：名前の前後の言葉で判定
+  ment.forEach((m,j)=>{ const nx=j+1<ment.length?ment[j+1].p:t0.length; const aft=t0.slice(m.e,Math.min(nx,m.e+18)), bef=t0.slice(Math.max(0,m.p-8),m.p);
+    if(/^(は|も|が)?(未所持|持って(い)?な|所持して(い)?な|持ってま?せん|引いて(い)?な|いな|いません)/.test(aft)) m.role='unowned';
+    else if(/^(は|も|を)?(使わな|使いたくな|除外|抜いて|外して|入れな|なしで|不要|禁止|NG|ダメ|だめ)/i.test(aft)) m.role='ban';
+    else if(/(親に|親は|親として|親を)$/.test(bef)||/^(を|は|も)?(親に|親として|親で)/.test(aft)) m.role='parent';
+    else if(/^(は|も)?(所持|持って(い)?る|持ってます|あり)/.test(aft)) m.role='owned';
+    else if(/^(で|を|が|の|用)?(育成|育て|周回|設計|作|走|因子|出走|チャンミ|LOH|リーグ|使いたい|使う)/i.test(aft)||/(育成|育てる|育てたい|本人)[はがをの:]?$/.test(bef)) m.role='child'; });
+  // 「AとBは使わない」「親はAとB」のような並べ書きは同じ役割にそろえる
+  const cj=(a,b)=>/^(と|、|,|，|や|および|及び|&|＆|または|か)$/.test(t0.slice(a.e,b.p));
+  for(let j=ment.length-2;j>=0;j--) if(!ment[j].role&&ment[j+1].role&&ment[j+1].role!=='child'&&cj(ment[j],ment[j+1])) ment[j].role=ment[j+1].role;
+  for(let j=1;j<ment.length;j++) if(!ment[j].role&&ment[j-1].role&&ment[j-1].role!=='child'&&cj(ment[j-1],ment[j])) ment[j].role=ment[j-1].role;
+  if(!ment.some(m=>m.role==='child')){ const f=ment.find(m=>!m.role); if(f) f.role='child'; }
+  res.ment=ment;
+  const st=t0.match(/大逃げ|逃げ|先行|差し|追い?込み?/); if(st) res.style=st[0].includes('逃')?1:st[0]==='先行'?2:st[0]==='差し'?3:4;
+  const dm=t0.match(/(?:^|[^\d])(\d{4})(?:m|M|メートル|m)?/); if(dm&&+dm[1]>=1000&&+dm[1]<=3600) res.dist=+dm[1];
+  if(/ダート|ダ(?=\d)|砂/.test(t0)) res.ground='ダート'; else if(/芝/.test(t0)) res.ground='芝';
+  const cm=t0.match(/短距離|マイル|中距離|長距離/); if(cm) res.cat=cm[0];
+  if(/右回り/.test(t0)) res.turn='右'; else if(/左回り/.test(t0)) res.turn='左';
+  for(const tr of [...tracks,...Object.keys(NL_TRACK_AL)]){ if(t0.includes(tr)){ res.track=NL_TRACK_AL[tr]||tr; break; } }
+  if(/beyond|ビヨンド|ドリームス|dreams|BC路線|(^|[^a-z])bd([^a-z]|$)/i.test(t0)) res.scn='bd'; else if(/トレセン軒|温泉|固有目標|URA|ura/.test(t0)) res.scn='ura';
+  // コース
+  if(res.race) res.course=res.race.co;
+  else if(res.track){ let L=Object.values(courses).filter(c=>c.track===res.track&&(!res.ground||c.ground===res.ground)&&(!res.cat||c.cat===res.cat));
+    if(res.dist){ const md=Math.min(...L.map(c=>Math.abs(c.dist-res.dist))); L=L.filter(c=>Math.abs(c.dist-res.dist)===md); if(md) res.notes.push(`${res.track}に${res.dist}mのコースがないため、いちばん近い距離にしました`); }
+    L.sort((a,b)=>(b.hasEff-a.hasEff)||(a.name.includes('(')-b.name.includes('('))); if(L[0]) res.course=L[0].id; }
+  else if(res.dist||res.cat||res.ground){ const g=res.ground||'芝'; const cat=res.cat||(res.dist?(res.dist<=1400?'短距離':res.dist<=1800?'マイル':res.dist<=2400?'中距離':'長距離'):'中距離'); res.cond={g,c:cat,d:res.dist||'',t:res.turn||''}; }
+  return res; }
+// 使わないウマ娘（候補から外す）
+try{ state.ban=new Set(JSON.parse(localStorage.getItem('umaBan')||'[]').map(Number)); }catch(e){ state.ban=new Set(); }
+const saveBan=()=>{ try{ localStorage.setItem('umaBan',JSON.stringify([...state.ban])); }catch(e){} try{ LOWBEST.clear(); }catch(e){} bpCache.clear(); };
+function nlApply(res){ const done=[];
+  if(res.scn&&res.scn!==state.scn){ setScn(res.scn); done.push(`周回シナリオ：${res.scn==='bd'?'Beyond Dreams':'固有目標'}`); }
+  const byRole=r=>[...new Map(res.ment.filter(m=>m.role===r).map(m=>[m.ch,m])).values()];
+  const uo=byRole('unowned'), ow=byRole('owned'), bn=byRole('ban'), pa=byRole('parent'), chd=byRole('child')[0];
+  for(const m of uo){ for(const c of (charCards[m.ch]||[])) if(!m.card||m.card===c) state.unowned.add(c); }
+  for(const m of ow){ for(const c of (charCards[m.ch]||[])) if(!m.card||m.card===c) state.unowned.delete(c); }
+  if(uo.length||ow.length) saveUnowned();
+  if(bn.length){ bn.forEach(m=>state.ban.add(m.ch)); saveBan(); }
+  // コース
+  const sel=$('#modeSel');
+  if(res.course&&courses[res.course]){ if(sel.value!=='course'){ sel.value='course'; sel.dispatchEvent(new Event('change')); } state.course=res.course; $('#selTrack').value=courses[res.course].track; fillCourses(); $('#selCourse').value=res.course; }
+  else if(res.cond){ if(sel.value!=='cond'){ sel.value='cond'; sel.dispatchEvent(new Event('change')); } $('#cGround').value=res.cond.g; $('#cCat').value=res.cond.c; $('#cDist').value=res.cond.d; $('#cTurn').value=res.cond.t; }
+  const cids=targetCourses();
+  // 育成ウマ娘：指定があればその衣装（衣装名があればそれ）、なければこのコース・脚質で最も評価が高いウマ娘
+  let id=null;
+  if(chd){ const L=chd.card?[chd.card]:(charCards[chd.ch]||[]); id=L.map(c=>[c,res.style?scoreCard(c,cids,res.style).total:Math.max(...[1,2,3,4].map(s=>scoreCard(c,cids,s).total))]).sort((a,b)=>b[1]-a[1])[0]?.[0]||null; }
+  else { let best=null,bv=-1e9; for(const c of cardIds){ if(state.ban.has(cards[c].ch)) continue; for(const s of (res.style?[res.style]:[1,2,3,4])){ const v=scoreCard(c,cids,s).total; if(v>bv){bv=v;best=[c,s];} } } if(best){ id=best[0]; if(!res.style) res.style=best[1]; } }
+  if(!id) return {ok:false,done,msg:'育成ウマ娘を決められませんでした'};
+  state.sel=id; state.pin=true; state.bpIdx=0; state.sub='bp'; state.style=res.style||bestStyleFor(id,cids); $('#umaQ').value=cards[id].n+' '+cards[id].t;
+  refresh();
+  // 親に入れたいウマ娘：10案の中から入っている案を探し、なければ1位の案の親を差し替える
+  let k=0; if(pa.length){ const bps=planBlueprints(id,cids,state.style); const want=pa.map(m=>m.ch).filter(ch=>ch!==cards[id].ch).slice(0,2);
+    const hit=bps.findIndex(bp=>want.every(ch=>bp.chs[1]===ch||bp.chs[2]===ch));
+    if(hit>=0) k=hit; else { const bp=bps[0]; if(bp){ const key=bpBaseKey(); state.ovr[key]=state.ovr[key]||{}; const ov={...(state.ovr[key][0]||{})}; const byCh={}; candidates(id,cids,state.style).forEach(x=>byCh[x.ch]=x);
+      want.forEach((ch,j)=>{ const x=byCh[ch]; const cid=(x&&(x.ocard||x.card))||(charCards[ch]||[])[0]; if(!cid) return; const slot=bp.chs[1]===ch||bp.chs[2]===ch?null:(j===0?(want.includes(bp.chs[2])?1:2):1); if(slot) ov[slot]=cid; });
+      state.ovr[key][0]=ov; bpCache.clear(); } } }
+  openBlueprintPage(k);
+  return {ok:true,done,id,k}; }
+function nlSummaryHTML(res,ap){ const chip=(l,v,c)=>`<span class="nlc ${c||''}"><small>${l}</small>${v}</span>`; const role=r=>[...new Set(res.ment.filter(m=>m.role===r).map(m=>esc(m.card?cards[m.card].t+' '+D.chars[m.ch]:D.chars[m.ch])))].join('・');
+  const co=res.course&&courses[res.course]; const out=[];
+  if(ap&&ap.id) out.push(chip('育成',`${esc(cards[ap.id].n)} <small>${esc(cards[ap.id].t)}</small>`,'hi'));
+  else if(role('child')) out.push(chip('育成',role('child')));
+  out.push(chip('コース',co?esc(co.name)+(res.race?`（${esc(res.race.nm)}）`:''):res.cond?`${res.cond.g} ${res.cond.c}${res.cond.d?' '+res.cond.d+'m':''}`:'<em>指定なし（いまの選択）</em>'));
+  out.push(chip('脚質',res.style?STY[res.style]:'<em>おすすめ</em>'));
+  if(role('parent')) out.push(chip('親に入れたい',role('parent')));
+  if(role('unowned')) out.push(chip('未所持にした',role('unowned'),'warn'));
+  if(role('owned')) out.push(chip('所持にした',role('owned')));
+  if(role('ban')) out.push(chip('使わない',role('ban'),'warn'));
+  if(res.scn) out.push(chip('周回シナリオ',res.scn==='bd'?'Beyond Dreams':'固有目標'));
+  return `<div class="nlSum">${out.join('')}</div>${res.notes.map(n=>`<p class="muted small">※ ${esc(n)}</p>`).join('')}`; }
+function nlBanHTML(){ if(!state.ban.size) return ''; return `<div class="nlBan"><small class="muted">使わないウマ娘：</small>${[...state.ban].map(ch=>`<button type="button" class="nlBanChip" data-nlunban="${ch}" title="クリックで解除">${esc(D.chars[ch]||ch)} ×</button>`).join('')}</div>`; }
+function nlRender(msg){ const o=document.getElementById('nlOut'); if(!o) return; o.innerHTML=(msg||'')+nlBanHTML(); }
+(()=>{ const ta=document.getElementById('nlText'); if(!ta) return; try{ ta.value=localStorage.getItem('umaNL')||''; }catch(e){} nlRender('');
+  const go=()=>{ const tx=ta.value.trim(); if(!tx){ nlRender('<p class="muted small">条件を入力してください</p>'); return; } try{ localStorage.setItem('umaNL',tx); }catch(e){}
+    const res=nlParse(tx); if(!res.ment.length&&!res.course&&!res.cond&&!res.style&&!res.scn){ nlRender('<p class="nlErr">ウマ娘名・コース（レース場＋距離／G1レース名）・脚質などを読み取れませんでした。例を参考に書き直してください。</p>'); return; }
+    const ap=nlApply(res); nlRender(nlSummaryHTML(res,ap)+(ap.ok?'<p class="muted small" style="margin:4px 0 0">この条件で設計図ページを開きました。読み取りが違っていたら、文章を直してもう一度押してください。</p>':`<p class="nlErr">${esc(ap.msg)}</p>`)); if(ap.ok) toast('文章から条件を読み取って設計図を作りました',4000); };
+  document.getElementById('nlGo').onclick=go; ta.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); go(); } });
+  document.getElementById('nlOut').addEventListener('click',e=>{ const b=e.target.closest('[data-nlunban]'); if(!b) return; state.ban.delete(+b.dataset.nlunban); saveBan(); nlRender(document.querySelector('#nlOut .nlSum')?document.querySelector('#nlOut .nlSum').outerHTML:''); refresh(); toast('「使わない」を解除しました'); });
+  document.querySelectorAll('[data-nlex]').forEach(b=>b.onclick=()=>{ ta.value=b.dataset.nlex; ta.focus(); }); })();
+
 renderOwn();
 refresh();
 })();
